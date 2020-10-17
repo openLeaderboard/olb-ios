@@ -20,6 +20,9 @@ struct ContentView: View {
         bgColor.edgesIgnoringSafeArea(.all)
             .overlay(
                 VStack {
+                    Image("olb-image")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
                     VStack {
                         TextField("Email...", text: $email)
                             .padding()
