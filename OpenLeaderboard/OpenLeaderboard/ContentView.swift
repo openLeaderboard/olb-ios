@@ -66,12 +66,82 @@ struct ContentView: View {
     }
     
     func login() {
-        print("ooga booga")
+        print("I am logged in!")
     }
 }
 
+struct Register: View {
+    
+    
+    @State var email: String = ""
+    @State var displayName: String = ""
+    @State var pword: String = ""
+    @State var confirmPword: String = ""
+    var body: some View {
+        bgColor.edgesIgnoringSafeArea(.all)
+            .overlay(
+                VStack {
+                    Image("olb-image")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                    VStack {
+                        TextField("Email...", text: $email)
+                            .padding()
+                            .foregroundColor(Color.blue)
+                            .background(Color.white)
+                            .cornerRadius(20.0)
+                            .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                        
+                        TextField("Display Name...", text: $displayName)
+                            .padding()
+                            .foregroundColor(Color.blue)
+                            .background(Color.white)
+                            .cornerRadius(20.0)
+                            .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                        
+                        
+                        SecureField("Password...", text: $pword)
+                            .padding()
+                            .background(Color.white)
+                            .cornerRadius(20.0)
+                            .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                        
+                        SecureField("Confirm Password...", text: $confirmPword)
+                            .padding()
+                            .background(Color.white)
+                            .cornerRadius(20.0)
+                                .padding(.bottom, 30)
+                        
+                        Button(action: login) {
+                                HStack(alignment: .center) {
+                                    Spacer()
+                                    Text("Register").foregroundColor(bgColor).bold()
+                                    Spacer()
+                                }
+                        }
+                        .padding().background(btnColor)
+                        .cornerRadius(20.0)
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        Text("Sign In")
+                            .foregroundColor(Color.white)
+                            .underline()
+                            .padding(.top)
+                        
+                    }
+                    .padding()
+                    
+                }
+                .padding()
+    )
+    }
+    
+    func login() {
+        print("I am signed up!")
+    }
+}
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        Register()
     }
 }
