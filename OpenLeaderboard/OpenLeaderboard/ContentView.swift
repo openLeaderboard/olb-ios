@@ -48,10 +48,6 @@ struct ContentView: View {
                         .cornerRadius(20.0)
                         .buttonStyle(PlainButtonStyle())
                         
-                        Text("Forgot Password?")
-                            .foregroundColor(Color.white)
-                            .underline()
-                            .padding(.top)
                         
                         Text("Create Account")
                         .foregroundColor(Color.white)
