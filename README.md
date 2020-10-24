@@ -1,2 +1,2 @@
 # olb-ios
-The iOS app for openLeaderboard
+The iOS app for openLeaderboard.
