@@ -11,11 +11,14 @@ let bgColor = Color(red: 94.0/255.0, green: 92.0/255.0, blue: 230.0/255.0, opaci
 
 let btnColor = Color(red: 249.0/255.0, green: 238.0/255.0, blue: 230.0/255.0, opacity: 1.0)
 
+let apiURL = "http://localhost:5000"
+let jwt = ""
+
 struct ContentView: View {
     
     
-    @State var email: String = ""
-    @State var pword: String = ""
+    @State var login_email: String = ""
+    @State var login_pword: String = ""
     var body: some View {
         bgColor.edgesIgnoringSafeArea(.all)
             .overlay(
@@ -24,14 +27,14 @@ struct ContentView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                     VStack {
-                        TextField("Email...", text: $email)
+                        TextField("Email...", text: $login_email)
                             .padding()
                             .foregroundColor(Color.blue)
                             .background(Color.white)
                             .cornerRadius(20.0)
                             .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
                         
-                        SecureField("Password...", text: $pword)
+                        SecureField("Password...", text: $login_pword)
                             .padding()
                             .background(Color.white)
                             .cornerRadius(20.0)
@@ -69,10 +72,11 @@ struct ContentView: View {
 struct Register: View {
     
     
-    @State var email: String = ""
-    @State var displayName: String = ""
-    @State var pword: String = ""
-    @State var confirmPword: String = ""
+    @State var reg_email: String = ""
+    @State var reg_displayName: String = ""
+    @State var reg_pword: String = ""
+    @State var reg_confirmPword: String = ""
+    @State var reg_emailInUse = ""
     var body: some View {
         bgColor.edgesIgnoringSafeArea(.all)
             .overlay(
@@ -81,14 +85,16 @@ struct Register: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                     VStack {
-                        TextField("Email...", text: $email)
+                        Text(reg_emailInUse)
+                            .foregroundColor(Color.white)
+                        TextField("Email...", text: $reg_email)
                             .padding()
                             .foregroundColor(Color.blue)
                             .background(Color.white)
                             .cornerRadius(20.0)
                             .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
                         
-                        TextField("Display Name...", text: $displayName)
+                        TextField("Display Name...", text: $reg_displayName)
                             .padding()
                             .foregroundColor(Color.blue)
                             .background(Color.white)
@@ -96,19 +102,19 @@ struct Register: View {
                             .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
                         
                         
-                        SecureField("Password...", text: $pword)
+                        SecureField("Password...", text: $reg_pword)
                             .padding()
                             .background(Color.white)
                             .cornerRadius(20.0)
                             .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
                         
-                        SecureField("Confirm Password...", text: $confirmPword)
+                        SecureField("Confirm Password...", text: $reg_confirmPword)
                             .padding()
                             .background(Color.white)
                             .cornerRadius(20.0)
                                 .padding(.bottom, 30)
                         
-                        Button(action: login) {
+                        Button(action: register) {
                                 HStack(alignment: .center) {
                                     Spacer()
                                     Text("Register").foregroundColor(bgColor).bold()
@@ -129,13 +135,12 @@ struct Register: View {
                     
                 }
                 .padding()
-    )
-    }
-    
-    func login() {
-        print("I am signed up!")
+            )
     }
 }
+
+
+
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         Register()
