@@ -15,7 +15,7 @@
 		2C7B1598253B597100D09EF0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2C7B1596253B597100D09EF0 /* LaunchScreen.storyboard */; };
 		2C7B15A3253B597100D09EF0 /* OpenLeaderboardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B15A2253B597100D09EF0 /* OpenLeaderboardTests.swift */; };
 		2C7B15AE253B597200D09EF0 /* OpenLeaderboardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B15AD253B597200D09EF0 /* OpenLeaderboardUITests.swift */; };
-		2C849D5C25472BB00024B1B1 /* RegisterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C849D5B25472BB00024B1B1 /* RegisterViewModel.swift */; };
+		2C849D5C25472BB00024B1B1 /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C849D5B25472BB00024B1B1 /* RegisterViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,7 +50,7 @@
 		2C7B15A9253B597200D09EF0 /* OpenLeaderboardUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenLeaderboardUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C7B15AD253B597200D09EF0 /* OpenLeaderboardUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenLeaderboardUITests.swift; sourceTree = "<group>"; };
 		2C7B15AF253B597200D09EF0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2C849D5B25472BB00024B1B1 /* RegisterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewModel.swift; sourceTree = "<group>"; };
+		2C849D5B25472BB00024B1B1 /* RegisterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +81,8 @@
 		2C7B157F253B596E00D09EF0 = {
 			isa = PBXGroup;
 			children = (
+				2C849D60254733BE0024B1B1 /* ViewControllers */,
+				2C849D5F254733AD0024B1B1 /* Views */,
 				2C7B158A253B596E00D09EF0 /* OpenLeaderboard */,
 				2C7B15A1253B597100D09EF0 /* OpenLeaderboardTests */,
 				2C7B15AC253B597200D09EF0 /* OpenLeaderboardUITests */,
@@ -103,12 +105,10 @@
 			children = (
 				2C7B158B253B596E00D09EF0 /* AppDelegate.swift */,
 				2C7B158D253B596E00D09EF0 /* SceneDelegate.swift */,
-				2C7B158F253B596E00D09EF0 /* RegisterView.swift */,
 				2C7B1591253B597100D09EF0 /* Assets.xcassets */,
 				2C7B1596253B597100D09EF0 /* LaunchScreen.storyboard */,
 				2C7B1599253B597100D09EF0 /* Info.plist */,
 				2C7B1593253B597100D09EF0 /* Preview Content */,
-				2C849D5B25472BB00024B1B1 /* RegisterViewModel.swift */,
 			);
 			path = OpenLeaderboard;
 			sourceTree = "<group>";
@@ -137,6 +137,22 @@
 				2C7B15AF253B597200D09EF0 /* Info.plist */,
 			);
 			path = OpenLeaderboardUITests;
+			sourceTree = "<group>";
+		};
+		2C849D5F254733AD0024B1B1 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2C7B158F253B596E00D09EF0 /* RegisterView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		2C849D60254733BE0024B1B1 /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				2C849D5B25472BB00024B1B1 /* RegisterViewController.swift */,
+			);
+			path = ViewControllers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -273,7 +289,7 @@
 				2C7B158C253B596E00D09EF0 /* AppDelegate.swift in Sources */,
 				2C7B158E253B596E00D09EF0 /* SceneDelegate.swift in Sources */,
 				2C7B1590253B596E00D09EF0 /* RegisterView.swift in Sources */,
-				2C849D5C25472BB00024B1B1 /* RegisterViewModel.swift in Sources */,
+				2C849D5C25472BB00024B1B1 /* RegisterViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
