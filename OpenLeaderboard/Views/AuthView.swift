@@ -84,71 +84,85 @@ struct RegView: View {
     @ObservedObject var auth = Auth()
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
-    
+    @State private var confirmPword: String = ""
     @State var reg_emailInUse = ""
     
     var body: some View {
-        bgColor.edgesIgnoringSafeArea(.all)
-            .overlay(
-                VStack {
-                    Image("olb-image")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
+        NavigationView {
+            bgColor.edgesIgnoringSafeArea(.all)
+                .overlay(
                     VStack {
-                        Text(reg_emailInUse)
-                            .foregroundColor(Color.white)
-                        TextField("Email...", text: self.$auth.reg_email)
-                            .padding()
-                            .foregroundColor(Color.blue)
-                            .background(Color.white)
-                            .cornerRadius(20.0)
-                            .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
-                        
-                        TextField("Display Name...", text: self.$auth.reg_displayName)
-                            .padding()
-                            .foregroundColor(Color.blue)
-                            .background(Color.white)
-                            .cornerRadius(20.0)
-                            .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
-                        
-                        
-                        SecureField("Password...", text: self.$auth.reg_pword)
-                            .padding()
-                            .background(Color.white)
-                            .cornerRadius(20.0)
-                            .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
-                        
-                        SecureField("Confirm Password...", text: self.$auth.reg_confirmPword)
-                            .padding()
-                            .background(Color.white)
-                            .cornerRadius(20.0)
-                            .padding(.bottom, 30)
-                        
-                        Button(action: register) {
-                            HStack(alignment: .center) {
-                                Spacer()
-                                Text("Register").foregroundColor(bgColor).bold()
-                                Spacer()
-                            }
+                        Image("olb-image")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                        VStack {
+                            Text(reg_emailInUse)
+                                .foregroundColor(Color.white)
+                            TextField("Email...", text: self.$auth.email)
+                                .padding()
+                                .foregroundColor(Color.blue)
+                                .background(Color.white)
+                                .cornerRadius(20.0)
+                                .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                            
+                            TextField("Display Name...", text: self.$auth.name)
+                                .padding()
+                                .foregroundColor(Color.blue)
+                                .background(Color.white)
+                                .cornerRadius(20.0)
+                                .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                            
+                            
+                            SecureField("Password...", text: self.$auth.password)
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(20.0)
+                                .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                            
+                            SecureField("Confirm Password...", text: $confirmPword)
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(20.0)
+                                .padding(.bottom, 30)
+                            
+                            NavigationLink(destination: LoginView()){
+                                Button(action: register) {
+                                    HStack(alignment: .center) {
+                                        Spacer()
+                                        Text("Register").foregroundColor(bgColor).bold()
+                                        Spacer()
+                                    }
+                                }
+                                .padding().background(btnColor)
+                                .cornerRadius(20.0)
+                                .buttonStyle(PlainButtonStyle())
+                                //.disabled(auth.hasValidRegistration == false)
+                            }.navigationBarTitle(Text(""))
+                            
+                            
+                            
                         }
-                        .padding().background(btnColor)
-                        .cornerRadius(20.0)
-                        .buttonStyle(PlainButtonStyle())
-                        .disabled(auth.hasValidRegistration == false)
-                        
+                        .padding()
                         
                     }
                     .padding()
-                    
-                }
-                .padding()
-        )
-            .alert(isPresented: $showingConfirmation) {
-                Alert(title: Text("Registration Success!"), message: Text(confirmationMessage), dismissButton: .default(Text("OK")))
+            )
+                .alert(isPresented: $showingConfirmation) {
+                    Alert(title: Text("Registration Success!"), message: Text(confirmationMessage), dismissButton: .default(Text("OK")))
+            }
         }
     }
     
     func register() {
+        
+        struct RegistrationToken: Decodable {
+            
+
+            let success: Bool
+            let message: String
+            let access_token: String
+        }
+        
         
         guard let encoded = try? JSONEncoder().encode(auth)
             else {
@@ -169,36 +183,17 @@ struct RegView: View {
                 print("No data in response: \(error?.localizedDescription ?? "Unknown error").")
                 return
             }
-            
-            print("data from server")
-            print(request.httpBody)
-            print(String(data: data, encoding: .utf8))
-            print(data)
-            
-            if let decodedRegistration = try? JSONDecoder().decode(Auth.self, from: data) {
-                print(decodedRegistration)
+
+            if let registrationToken = try? JSONDecoder().decode(RegistrationToken.self, from: data) {
                 self.confirmationMessage =
-                "New User Email: \(decodedRegistration.$reg_email)\n" +
-                "New User Display Name: \(decodedRegistration.$reg_displayName)\n" +
-                "New User Password: \(decodedRegistration.$reg_pword)"
+                    "User Created?: \(registrationToken.success)\n" +
+                    "User Created Message: \(registrationToken.message)\n" +
+                    "User Access Token (JWT): \(registrationToken.access_token)"
                 self.showingConfirmation = true
             } else {
                 print("Invalid response from server")
             }
         }.resume()
-        
-    //
-    //    let params = "email=\(reg_email)"
-    //
-    //    guard let url = URL(string: apiURL + "/user/register") else {
-    //        fatalError("Registration URL not working")
-    //    }
-    //
-    //    var request = URLRequest(url: url)
-    //    request.httpMethod = "POST"
-    //    request.httpBody = params.data(using: String.Encoding.utf8)
-    //
-    //    URLSession.shared.dataTask(with: request)
     }
 
 }
