@@ -17,6 +17,8 @@
 		2C7B15A3253B597100D09EF0 /* OpenLeaderboardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B15A2253B597100D09EF0 /* OpenLeaderboardTests.swift */; };
 		2C7B15AE253B597200D09EF0 /* OpenLeaderboardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B15AD253B597200D09EF0 /* OpenLeaderboardUITests.swift */; };
 		F7894D50254B97F7003D2462 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7894D4F254B97F7003D2462 /* LoginViewModel.swift */; };
+		F7894D5C254BA482003D2462 /* ParentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7894D5B254BA482003D2462 /* ParentView.swift */; };
+		F7894D62254BA603003D2462 /* TabViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7894D61254BA603003D2462 /* TabViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +55,8 @@
 		2C7B15AD253B597200D09EF0 /* OpenLeaderboardUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenLeaderboardUITests.swift; sourceTree = "<group>"; };
 		2C7B15AF253B597200D09EF0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F7894D4F254B97F7003D2462 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
+		F7894D5B254BA482003D2462 /* ParentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentView.swift; sourceTree = "<group>"; };
+		F7894D61254BA603003D2462 /* TabViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +149,7 @@
 			isa = PBXGroup;
 			children = (
 				2C7B158F253B596E00D09EF0 /* AuthView.swift */,
+				F7894D5B254BA482003D2462 /* ParentView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -154,6 +159,7 @@
 			children = (
 				F7894D4F254B97F7003D2462 /* LoginViewModel.swift */,
 				2C17B2412548800000E32111 /* AuthViewModel.swift */,
+				F7894D61254BA603003D2462 /* TabViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -293,6 +299,8 @@
 				F7894D50254B97F7003D2462 /* LoginViewModel.swift in Sources */,
 				2C7B158C253B596E00D09EF0 /* AppDelegate.swift in Sources */,
 				2C7B158E253B596E00D09EF0 /* SceneDelegate.swift in Sources */,
+				F7894D5C254BA482003D2462 /* ParentView.swift in Sources */,
+				F7894D62254BA603003D2462 /* TabViewModel.swift in Sources */,
 				2C7B1590253B596E00D09EF0 /* AuthView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -20,8 +20,6 @@ struct LoginView: View {
     
     @State var login_email: String = ""
     @State var login_pword: String = ""
-    @State private var confirmLogin = ""
-    @State private var showingConfirmation = false
     @ObservedObject var loginViewModel = LoginViewModel()
     
     var body: some View {
@@ -80,7 +78,7 @@ struct LoginView: View {
             let access_token: String
         }
         
-        guard let encoded = try? JSONEncoder().encode(login)
+        guard let encoded = try? JSONEncoder().encode(loginViewModel)
             else {
                 print("Failed to encode login")
                 return
@@ -100,11 +98,9 @@ struct LoginView: View {
             }
 
             if let loginToken = try? JSONDecoder().decode(LoginToken.self, from: data) {
-                self.confirmLogin =
-                    "Login Successful?: \(loginToken.success)\n" +
-                    "Login Message: \(loginToken.message)\n" +
-                    "User Access Token (JWT): \(loginToken.access_token)"
-                self.showingConfirmation = true
+                NavigationLink(destination: TabParent(tabViewModel: TabViewModel()))
+                    .navigationBarTitle(Text(""))
+                    .navigationBarHidden(true)
             } else {
                 print("Invalid response from server")
                 print(data, LoginToken.self)
@@ -189,7 +185,7 @@ struct RegView: View {
             let access_token: String
         }
         
-        guard let encoded = try? JSONEncoder().encode(auth)
+        guard let encoded = try? JSONEncoder().encode(authViewModel)
             else {
                 print("Failed to encode registration")
                 return
