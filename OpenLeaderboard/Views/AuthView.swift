@@ -104,7 +104,7 @@ struct LoginView: View {
 
             if let loginToken = try? JSONDecoder().decode(LoginToken.self, from: data) {
                 if (loginToken.success) {
-                    userData.loggedIn = true
+                    self.userData.loggedIn = true
                 }
             } else {
                 print("Invalid response from server")
