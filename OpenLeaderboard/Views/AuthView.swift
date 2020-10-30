@@ -21,54 +21,59 @@ struct LoginView: View {
     @State var login_email: String = ""
     @State var login_pword: String = ""
     @ObservedObject var loginViewModel = LoginViewModel()
+    @EnvironmentObject var userData: UserData
     
     var body: some View {
-        NavigationView{
-            bgColor.edgesIgnoringSafeArea(.all)
-                .overlay(
-                    VStack {
-                        Image("olb-image")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                        
+        if (!userData.loggedIn) {
+            NavigationView {
+                bgColor.edgesIgnoringSafeArea(.all)
+                    .overlay(
                         VStack {
-                            TextField("Email...", text: self.$loginViewModel.email)
-                                .padding()
-                                .foregroundColor(Color.blue)
-                                .background(Color.white)
-                                .cornerRadius(20.0)
-                                .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                            Image("olb-image")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
                             
-                            SecureField("Password...", text: self.$loginViewModel.password)
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(20.0)
-                                .padding(.bottom, 30)
-                            
-                            Button(action: loginAction) {
-                                HStack(alignment: .center) {
-                                    Spacer()
-                                    Text("Login").foregroundColor(bgColor).bold()
-                                    Spacer()
+                            VStack {
+                                TextField("Email...", text: self.$loginViewModel.email)
+                                    .padding()
+                                    .foregroundColor(Color.blue)
+                                    .background(Color.white)
+                                    .cornerRadius(20.0)
+                                    .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                                
+                                SecureField("Password...", text: self.$loginViewModel.password)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(20.0)
+                                    .padding(.bottom, 30)
+                                
+                                Button(action: loginAction) {
+                                    HStack(alignment: .center) {
+                                        Spacer()
+                                        Text("Login").foregroundColor(bgColor).bold()
+                                        Spacer()
+                                    }
                                 }
+                                .padding().background(btnColor)
+                                .cornerRadius(20.0)
+                                .buttonStyle(PlainButtonStyle())
+                                
+                                
+                                NavigationLink(destination: RegView(authViewModel: AuthViewModel())) {
+                                    Text("Create Account")
+                                        .foregroundColor(Color.white)
+                                        .underline()
+                                        .padding(.top)
+                                }.navigationBarTitle(Text(""))
                             }
-                            .padding().background(btnColor)
-                            .cornerRadius(20.0)
-                            .buttonStyle(PlainButtonStyle())
-                            
-                            
-                            NavigationLink(destination: RegView(authViewModel: AuthViewModel())){
-                                Text("Create Account")
-                                    .foregroundColor(Color.white)
-                                    .underline()
-                                    .padding(.top)
-                            }.navigationBarTitle(Text(""))
+                            .padding()
                         }
                         .padding()
-                    }
-                    .padding()
-            )
-        }.accentColor(Color.white)
+                )
+            }.accentColor(Color.white)
+        } else {
+            TabParent()
+        }
     }
     
     func loginAction() {
@@ -98,9 +103,9 @@ struct LoginView: View {
             }
 
             if let loginToken = try? JSONDecoder().decode(LoginToken.self, from: data) {
-                NavigationLink(destination: TabParent(tabViewModel: TabViewModel()))
-                    .navigationBarTitle(Text(""))
-                    .navigationBarHidden(true)
+                if (loginToken.success) {
+                    userData.loggedIn = true
+                }
             } else {
                 print("Invalid response from server")
                 print(data, LoginToken.self)

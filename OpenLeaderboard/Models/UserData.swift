@@ -1,5 +1,5 @@
 //
-//  TabViewModel.swift
+//  UserData.swift
 //  OpenLeaderboard
 //
 //  Created by Tim Lyster on 2020-10-29.
@@ -8,8 +8,6 @@
 
 import Foundation
 
-class TabViewModel: ObservableObject, Codable {
-    
-    init() { }
-    
+class UserData: ObservableObject {
+    @Published var loggedIn = false
 }

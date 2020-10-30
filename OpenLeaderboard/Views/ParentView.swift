@@ -12,8 +12,9 @@ let backgroundColor = Color(red: 94.0/255.0, green: 92.0/255.0, blue: 230.0/255.
 let platinum = Color(red: 152.0/255.0, green: 193.0/255.0, blue: 217.0/255.0, opacity: 1.0)
 
 struct TabParent: View {
+
     @ObservedObject var tabViewModel = TabViewModel()
-    
+
     var body: some View {
         NavigationView {
             TabView {
