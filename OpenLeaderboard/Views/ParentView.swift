@@ -89,11 +89,6 @@ struct AddBoardView: View {
     }
 }
 
-struct ProfileView: View {
-    var body: some View {
-        Text("Profile Screen")
-    }
-}
 
 struct SearchView: View {
     var body: some View {

@@ -75,7 +75,6 @@ struct LoginView: View {
             TabParent()
         }
     }
-    
     func loginAction() {
         struct LoginToken: Decodable {
             let success: Bool
