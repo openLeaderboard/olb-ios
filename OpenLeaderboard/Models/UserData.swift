@@ -10,4 +10,5 @@ import Foundation
 
 class UserData: ObservableObject {
     @Published var loggedIn = false
+    @Published var access_token = ""
 }
