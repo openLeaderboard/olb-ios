@@ -10,6 +10,9 @@ import SwiftUI
 
 let backgroundColor = Color(red: 94.0/255.0, green: 92.0/255.0, blue: 230.0/255.0, opacity: 1.0)
 let lightGray = Color(red: 247.0/255.0, green: 247.0/255.0, blue: 257.0/255.0, opacity: 1.0)
+let bronze = Color(red: 221.0/255.0, green: 167.0/255.0, blue: 123.0/255.0, opacity: 1.0)
+let silver = Color(red: 198.0/255.0, green: 185.0/255.0, blue: 169.0/255.0, opacity: 1.0)
+let gold = Color(red: 255.0/255.0, green: 191.0/255.0, blue: 0.0/255.0, opacity: 1.0)
 let platinum = Color(red: 152.0/255.0, green: 193.0/255.0, blue: 217.0/255.0, opacity: 1.0)
 
 struct Initial: Codable {
@@ -87,36 +90,50 @@ struct MainBoardsView: View {
                 ForEach(fetchBoards.boards, id: \.self) { board in
                     HStack {
                         HStack {
-                            Image(systemName: "seal.fill").foregroundColor(platinum).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                            Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
                             VStack (alignment: .leading) {
                                 Text(board.board_name)
                                 Text("#\(board.rank) of \(board.users_count)")
                                     .font(.system(size: 15))
                                     .foregroundColor(.gray)
                             }
-                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                        Spacer()
                         HStack {
                             VStack (alignment: .trailing) {
-                                Text("2100")
+                                Text(String(format: "%.1f", board.rating))
                                 Text("\(board.wins)W / \(board.losses)L")
                                     .font(.system(size: 15))
                                     .foregroundColor(.gray)
                             }
-                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 0)).foregroundColor(.gray)
+                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                         }
-                    }.padding(EdgeInsets(top: 10, leading: -40, bottom: 10, trailing: 0))
+                    }.padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 20))
                 }
             }
             Spacer()
         }
     }
+    
+    func getIconColor(iconInt: Int) -> Color {
+        switch iconInt {
+        case 1:
+            return platinum
+        case 2:
+            return gold
+        case 3:
+            return silver
+        default:
+            return bronze
+        }
+    }
+
 }
 
 struct AddBoardView: View {
     
     var accessToken: String
-    @State var board_name: String = ""
-    @State var isPublic: Bool = true;
+    @ObservedObject var addBoardViewModel = AddBoardViewModel()
     
     init(accessToken: String) {
         self.accessToken = accessToken
@@ -127,12 +144,14 @@ struct AddBoardView: View {
             Text("Board Information")
                 .fontWeight(.bold)
                 .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
-            TextField("Board Name...", text: $board_name)
+            
+            TextField("Board Name...", text: self.$addBoardViewModel.board_name)
                 .padding()
-                .background(lightGray)
-                .shadow(radius: 8)
+                .foregroundColor(Color.blue)
+                .background(Color.white)
                 .cornerRadius(20.0)
                 .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+            
             Text("Privacy Settings")
                 .fontWeight(.bold)
                 .padding(EdgeInsets(top: 0, leading: 0, bottom: 15, trailing: 0))
@@ -141,19 +160,19 @@ struct AddBoardView: View {
                 Text("Public")
                     .frame(alignment: .leading)
                     .onTapGesture {
-                        isPublic.toggle()
+                        self.addBoardViewModel.is_public.toggle()
                     }
             }.padding(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
-            .foregroundColor(isPublic ? bgColor : .gray)
+            .foregroundColor(self.addBoardViewModel.is_public ? bgColor : .gray)
             HStack {
                 Image(systemName: "eye.slash.fill")
                 Text("Private")
                     .frame(alignment: .leading)
                     .onTapGesture {
-                        isPublic.toggle()
+                        self.addBoardViewModel.is_public.toggle()
                     }
             }.padding(EdgeInsets(top: 0, leading: 0, bottom: 75, trailing: 0))
-            .foregroundColor(isPublic ? .gray : bgColor)
+            .foregroundColor(self.addBoardViewModel.is_public ? .gray : bgColor)
             Button(action: addBoard){
                 HStack(alignment: .center) {
                     Spacer()
@@ -168,10 +187,47 @@ struct AddBoardView: View {
     }
     
     func addBoard() {
-        print("clicked")
+        
+        struct RegistrationToken: Decodable {
+            let success: Bool
+            let message: String
+            let board_id: String
+        }
+        
+        guard let encoded = try? JSONEncoder().encode(addBoardViewModel)
+            else {
+                print("Failed to encode creation of board rqeuest")
+                return
+        }
+        
+        let url = URL(string: (apiURL + "/board/create"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "POST"
+        request.httpBody = encoded
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            guard let data = data else {
+                print("No data in response: \(error?.localizedDescription ?? "Unknown error").")
+                return
+            }
+            
+            if let createBoardResponse = try? JSONDecoder().decode(RegistrationToken.self, from: data) {
+                print("Board created successfully!")
+            } else {
+                print("Invalid response from server")
+            }
+        }.resume()
     }
 }
 
+struct ProfileView: View {
+    var body: some View {
+        Text("Profile Screen")
+    }
+}
 
 struct SearchView: View {
     var body: some View {
