@@ -106,7 +106,9 @@ struct MainBoardsView: View {
                                     .font(.system(size: 15))
                                     .foregroundColor(.gray)
                             }
-                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                        
+                        Spacer()
                         HStack {
                             VStack (alignment: .trailing) {
                                 Text("2100")
@@ -116,7 +118,8 @@ struct MainBoardsView: View {
                             }
                         Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 0)).foregroundColor(.gray)
                         }
-                    }.padding(EdgeInsets(top: 10, leading: -40, bottom: 10, trailing: 0))
+                    }.padding(EdgeInsets(top: 10, leading: 0, bottom: 0, trailing: 20))
+                    Divider()
                 }
             }
             Spacer()
