@@ -9,44 +9,24 @@
 import SwiftUI
 
 let backgroundColor = Color(red: 94.0/255.0, green: 92.0/255.0, blue: 230.0/255.0, opacity: 1.0)
+let lightGray = Color(red: 247.0/255.0, green: 247.0/255.0, blue: 257.0/255.0, opacity: 1.0)
 let platinum = Color(red: 152.0/255.0, green: 193.0/255.0, blue: 217.0/255.0, opacity: 1.0)
 
-struct TabParent: View {
+struct Initial: Codable {
+    let boards: [Boards]
+}
 
-    @ObservedObject var tabViewModel = TabViewModel()
+struct Boards: Codable, Hashable {
+    public var board_id: Int
+    public var board_name: String
+    public var rank_icon: Int
+    public var rank: Int
+    public var users_count: Int
+    public var rating: Double
+    public var wins: Int
+    public var losses: Int
+}
 
-<<<<<<< Updated upstream
-    var body: some View {
-        NavigationView {
-            TabView {
-                ProfileView()
-                 .tabItem {
-                    Image(systemName: "person.fill")
-                    Text("Profile")
-                  }
-                MainBoardsView()
-                  .tabItem {
-                     Image(systemName: "list.bullet")
-                     Text("Boards")
-                   }
-                AddBoardView()
-                  .tabItem {
-                     Image(systemName: "plus")
-                     Text("Add Board")
-                   }
-                SearchView()
-                  .tabItem {
-                     Image(systemName: "magnifyingglass")
-                     Text("Search")
-                   }
-                NotificationsView()
-                  .tabItem {
-                     Image(systemName: "bell.fill")
-                     Text("Notifications")
-                   }
-               
-            }.accentColor(bgColor)
-=======
 struct Profile: Codable {
     
     //init(from:) {}
@@ -90,7 +70,56 @@ struct TabParent: View {
                  Image(systemName: "bell.fill")
                  Text("Notifications")
                }
->>>>>>> Stashed changes
+        }
+        .accentColor(bgColor)
+        .navigationBarTitle("Boards", displayMode: .inline)
+        .navigationBarHidden(false)
+    }
+}
+
+struct MainBoardsView: View {
+    
+    var accessToken: String
+    @State private var menuIndex: Int = 0
+    @ObservedObject var fetchBoards: FetchBoards
+    
+    init(accessToken: String) {
+        self.accessToken = accessToken
+        self.fetchBoards = FetchBoards(accessToken: accessToken)
+    }
+    
+    var body: some View {
+        VStack {
+            Picker("Boards Index", selection: $menuIndex) {
+                Text("All Boards")
+                Text("My Boards")
+            }.pickerStyle(SegmentedPickerStyle())
+            
+            VStack (alignment: .leading) {
+                ForEach(fetchBoards.boards, id: \.self) { board in
+                    HStack {
+                        HStack {
+                            Image(systemName: "seal.fill").foregroundColor(platinum).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                            VStack (alignment: .leading) {
+                                Text(board.board_name)
+                                Text("#\(board.rank) of \(board.users_count)")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.gray)
+                            }
+                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        HStack {
+                            VStack (alignment: .trailing) {
+                                Text("2100")
+                                Text("\(board.wins)W / \(board.losses)L")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.gray)
+                            }
+                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 0)).foregroundColor(.gray)
+                        }
+                    }.padding(EdgeInsets(top: 10, leading: -40, bottom: 10, trailing: 0))
+                }
+            }
+            Spacer()
         }
     }
 }
@@ -193,68 +222,63 @@ struct ProfileActivity: View {
 
 
 
-struct MainBoardsView: View {
+struct AddBoardView: View {
     
-    @State private var menuIndex: Int = 0
+    var accessToken: String
+    @State var board_name: String = ""
+    @State var isPublic: Bool = true;
+    
+    init(accessToken: String) {
+        self.accessToken = accessToken
+    }
+    
     var body: some View {
-        NavigationView {
-            VStack {
-                Picker("Boards Index", selection: $menuIndex) {
-                    Text("All Boards")
-                    Text("My Boards")
-                }.pickerStyle(SegmentedPickerStyle())
-                Spacer()
-                List {
-                    HStack {
-<<<<<<< Updated upstream
-                        Image(systemName: "seal.fill").foregroundColor(platinum)
-                        VStack (alignment: .leading) {
-                            Text("Joel's Board")
-                            Text("#1 of 56")
-                                .font(.system(size: 15))
-                                .foregroundColor(.gray)
-                        }.padding(EdgeInsets(top: 5, leading: 10, bottom: 5, trailing: 105))
-                        VStack (alignment: .trailing){
-                            Text("2100")
-                            Text("57W / 10L")
-                                .font(.system(size: 15))
-                                .foregroundColor(.gray)
-                        }
-                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 0)).foregroundColor(.gray)
+        VStack (alignment: .leading) {
+            Text("Board Information")
+                .fontWeight(.bold)
+                .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+            TextField("Board Name...", text: $board_name)
+                .padding()
+                .background(lightGray)
+                .shadow(radius: 8)
+                .cornerRadius(20.0)
+                .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+            Text("Privacy Settings")
+                .fontWeight(.bold)
+                .padding(EdgeInsets(top: 0, leading: 0, bottom: 15, trailing: 0))
+            HStack {
+                Image(systemName: "eye.fill")
+                Text("Public")
+                    .frame(alignment: .leading)
+                    .onTapGesture {
+                        isPublic.toggle()
                     }
-=======
-                        HStack {
-                            Image(systemName: "seal.fill").foregroundColor(platinum).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                            VStack (alignment: .leading) {
-                                Text(board.board_name)
-                                Text("#\(board.rank) of \(board.users_count)")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.gray)
-                            }
-                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                        Spacer()
-                        HStack {
-                            VStack (alignment: .trailing) {
-                                Text("2100")
-                                Text("\(board.wins)W / \(board.losses)L")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.gray)
-                            }
-                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 0)).foregroundColor(.gray)
-                        }
-                    }.padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
-                    
-                    Divider()
->>>>>>> Stashed changes
+            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
+            .foregroundColor(isPublic ? bgColor : .gray)
+            HStack {
+                Image(systemName: "eye.slash.fill")
+                Text("Private")
+                    .frame(alignment: .leading)
+                    .onTapGesture {
+                        isPublic.toggle()
+                    }
+            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 75, trailing: 0))
+            .foregroundColor(isPublic ? .gray : bgColor)
+            Button(action: addBoard){
+                HStack(alignment: .center) {
+                    Spacer()
+                    Text("Create Board").foregroundColor(.white).bold()
+                    Spacer()
                 }
             }
-        }
+            .padding().background(bgColor)
+            .cornerRadius(20.0)
+            .buttonStyle(PlainButtonStyle())
+        }.padding(30)
     }
-}
-
-struct AddBoardView: View {
-    var body: some View {
-        Text("Add Boards Screen")
+    
+    func addBoard() {
+        print("clicked")
     }
 }
 
@@ -273,6 +297,26 @@ struct NotificationsView: View {
 
 struct ParentView_Previews: PreviewProvider {
     static var previews: some View {
-        TabParent(tabViewModel: TabViewModel())
+        TabParent().environmentObject(UserData())
     }
 }
+
+//ForEach(fetchBoards.boards, id: \.self) { board in
+//    HStack {
+//        Image(systemName: "seal.fill").foregroundColor(platinum)
+//        VStack (alignment: .leading) {
+//            Text(board.board_name)
+//            Text("#\(board.rank) of \(board.users_count)")
+//                .font(.system(size: 15))
+//                .foregroundColor(.gray)
+//        }.padding(EdgeInsets(top: 5, leading: 10, bottom: 5, trailing: 105))
+//        VStack (alignment: .trailing) {
+//            Text("2100")
+//            Text("\(board.wins)W / \(board.losses)L")
+//                .font(.system(size: 15))
+//                .foregroundColor(.gray)
+//        }
+//        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 0)).foregroundColor(.gray)
+//    }
+//
+//}

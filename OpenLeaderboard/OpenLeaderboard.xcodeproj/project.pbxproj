@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2C17B2422548800000E32111 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C17B2412548800000E32111 /* AuthViewModel.swift */; };
+		2C3C7FC7255125B100BA59FC /* AddBoardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C3C7FC6255125B100BA59FC /* AddBoardViewModel.swift */; };
 		2C7B158C253B596E00D09EF0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B158B253B596E00D09EF0 /* AppDelegate.swift */; };
 		2C7B158E253B596E00D09EF0 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B158D253B596E00D09EF0 /* SceneDelegate.swift */; };
 		2C7B1590253B596E00D09EF0 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B158F253B596E00D09EF0 /* AuthView.swift */; };
@@ -16,7 +17,6 @@
 		2C7B1598253B597100D09EF0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2C7B1596253B597100D09EF0 /* LaunchScreen.storyboard */; };
 		2C7B15A3253B597100D09EF0 /* OpenLeaderboardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B15A2253B597100D09EF0 /* OpenLeaderboardTests.swift */; };
 		2C7B15AE253B597200D09EF0 /* OpenLeaderboardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B15AD253B597200D09EF0 /* OpenLeaderboardUITests.swift */; };
-		2C9234E0254DF979005B5CBE /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C9234DF254DF979005B5CBE /* ProfileView.swift */; };
 		F7894D50254B97F7003D2462 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7894D4F254B97F7003D2462 /* LoginViewModel.swift */; };
 		F7894D5C254BA482003D2462 /* ParentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7894D5B254BA482003D2462 /* ParentView.swift */; };
 		F7894D62254BA603003D2462 /* TabViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7894D61254BA603003D2462 /* TabViewModel.swift */; };
@@ -42,6 +42,7 @@
 
 /* Begin PBXFileReference section */
 		2C17B2412548800000E32111 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		2C3C7FC6255125B100BA59FC /* AddBoardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddBoardViewModel.swift; sourceTree = "<group>"; };
 		2C7B1588253B596E00D09EF0 /* OpenLeaderboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenLeaderboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C7B158B253B596E00D09EF0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2C7B158D253B596E00D09EF0 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -56,7 +57,6 @@
 		2C7B15A9253B597200D09EF0 /* OpenLeaderboardUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenLeaderboardUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C7B15AD253B597200D09EF0 /* OpenLeaderboardUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenLeaderboardUITests.swift; sourceTree = "<group>"; };
 		2C7B15AF253B597200D09EF0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2C9234DF254DF979005B5CBE /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		F7894D4F254B97F7003D2462 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		F7894D5B254BA482003D2462 /* ParentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentView.swift; sourceTree = "<group>"; };
 		F7894D61254BA603003D2462 /* TabViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabViewModel.swift; sourceTree = "<group>"; };
@@ -155,7 +155,6 @@
 			children = (
 				2C7B158F253B596E00D09EF0 /* AuthView.swift */,
 				F7894D5B254BA482003D2462 /* ParentView.swift */,
-				2C9234DF254DF979005B5CBE /* ProfileView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -166,6 +165,7 @@
 				F7894D4F254B97F7003D2462 /* LoginViewModel.swift */,
 				2C17B2412548800000E32111 /* AuthViewModel.swift */,
 				F7894D61254BA603003D2462 /* TabViewModel.swift */,
+				2C3C7FC6255125B100BA59FC /* AddBoardViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -310,7 +310,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2C17B2422548800000E32111 /* AuthViewModel.swift in Sources */,
-				2C9234E0254DF979005B5CBE /* ProfileView.swift in Sources */,
+				2C3C7FC7255125B100BA59FC /* AddBoardViewModel.swift in Sources */,
 				F7894D50254B97F7003D2462 /* LoginViewModel.swift in Sources */,
 				F7894D6B254BAD84003D2462 /* UserData.swift in Sources */,
 				2C7B158C253B596E00D09EF0 /* AppDelegate.swift in Sources */,
