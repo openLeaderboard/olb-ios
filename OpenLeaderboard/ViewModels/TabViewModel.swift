@@ -45,6 +45,7 @@ class FetchBoards: ObservableObject {
     }
 }
 
+
 class FetchProfile: ObservableObject {
 
     //@Published var current_profile = Profile.init()
