@@ -37,30 +37,30 @@ struct TabParent: View {
     var body: some View {
         TabView {
             ProfileView()
-             .tabItem {
-                Image(systemName: "person.fill")
-                Text("Profile")
-              }
+                .tabItem {
+                    Image(systemName: "person.fill")
+                    Text("Profile")
+                }
             MainBoardsView(accessToken: userData.access_token)
-              .tabItem {
-                 Image(systemName: "list.bullet")
-                 Text("Boards")
-               }
-            AddBoardView(accessToken: userData.access_token)
-              .tabItem {
-                 Image(systemName: "plus")
-                 Text("Add Board")
-               }
+                .tabItem {
+                    Image(systemName: "list.bullet")
+                    Text("Boards")
+                }
+            SubmitMatchView()
+                .tabItem {
+                    Image(systemName: "plus")
+                    Text("Submit Match")
+                }
             SearchView()
-              .tabItem {
-                 Image(systemName: "magnifyingglass")
-                 Text("Search")
-               }
+                .tabItem {
+                    Image(systemName: "magnifyingglass")
+                    Text("Search")
+                }
             NotificationsView()
-              .tabItem {
-                 Image(systemName: "bell.fill")
-                 Text("Notifications")
-               }
+                .tabItem {
+                    Image(systemName: "bell.fill")
+                    Text("Notifications")
+                }
         }
         .accentColor(bgColor)
         .navigationBarTitle("Boards", displayMode: .inline)
@@ -80,38 +80,69 @@ struct MainBoardsView: View {
     }
     
     var body: some View {
-        VStack {
-            Picker("Boards Index", selection: $menuIndex) {
-                Text("All Boards")
-                Text("My Boards")
-            }.pickerStyle(SegmentedPickerStyle())
-            
-            VStack (alignment: .leading) {
-                ForEach(fetchBoards.boards, id: \.self) { board in
-                    HStack {
-                        HStack {
-                            Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
-                            VStack (alignment: .leading) {
-                                Text(board.board_name)
-                                Text("#\(board.rank) of \(board.users_count)")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.gray)
+        NavigationView {
+            ZStack {
+                VStack {
+                    Picker("Boards Index", selection: $menuIndex) {
+                        Text("All Boards")
+                        Text("My Boards")
+                    }.pickerStyle(SegmentedPickerStyle())
+                    VStack (alignment: .leading) {
+                        ForEach(fetchBoards.boards, id: \.self) { board in
+                            HStack {
+                                NavigationLink(destination: BoardDetails(accessToken: self.accessToken, currentBoard: board)) {
+                                    HStack {
+                                        Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
+                                        VStack (alignment: .leading) {
+                                            Text(board.board_name)
+                                                .foregroundColor(Color(UIColor.label))
+                                            Text("#\(board.rank) of \(board.users_count)")
+                                                .font(.system(size: 15))
+                                                .foregroundColor(.gray)
+                                        }
+                                    }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                    Spacer()
+                                    HStack {
+                                        VStack (alignment: .trailing) {
+                                            Text(String(format: "%.1f", board.rating))
+                                                .foregroundColor(Color(UIColor.label))
+                                            Text("\(board.wins)W / \(board.losses)L")
+                                                .font(.system(size: 15))
+                                                .foregroundColor(.gray)
+                                        }
+                                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                                    }
+                                }
+                                .padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 20))
                             }
-                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
-                        Spacer()
-                        HStack {
-                            VStack (alignment: .trailing) {
-                                Text(String(format: "%.1f", board.rating))
-                                Text("\(board.wins)W / \(board.losses)L")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.gray)
-                            }
-                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                         }
-                    }.padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 20))
-                }
+                        VStack {
+                            Spacer()
+                            HStack {
+                                Spacer()
+                                NavigationLink(destination: AddBoardView(accessToken: self.accessToken)) {
+                                    Button(action: {
+                                        print("Create Board Navigation")
+                                    }, label: {
+                                        Text("+")
+                                        .font(.system(.largeTitle))
+                                        .frame(width: 55, height: 48)
+                                        .foregroundColor(Color.white)
+                                        .padding(.bottom, 7)
+                                    })
+                                    .background(bgColor)
+                                    .cornerRadius(38.5)
+                                    .padding()
+                                    .shadow(color: Color.black.opacity(0.3),
+                                            radius: 3,
+                                            x: 3,
+                                            y: 3)
+                                }
+                            }
+                        }
+                    }
+                }.padding(.top, -70)
             }
-            Spacer()
         }
     }
     
@@ -127,7 +158,7 @@ struct MainBoardsView: View {
             return bronze
         }
     }
-
+    
 }
 
 struct AddBoardView: View {
@@ -195,9 +226,9 @@ struct AddBoardView: View {
         }
         
         guard let encoded = try? JSONEncoder().encode(addBoardViewModel)
-            else {
-                print("Failed to encode creation of board rqeuest")
-                return
+        else {
+            print("Failed to encode creation of board rqeuest")
+            return
         }
         
         let url = URL(string: (apiURL + "/board/create"))!
@@ -229,9 +260,72 @@ struct ProfileView: View {
     }
 }
 
+struct BoardDetails: View {
+    
+    var accessToken: String
+    var board: Boards
+    
+    init(accessToken: String, currentBoard: Boards) {
+        self.accessToken = accessToken
+        self.board = currentBoard
+    }
+    
+    var body: some View {
+        NavigationView {
+            VStack{
+                Text("\(self.board.board_name)").font(.largeTitle).bold()
+                Divider()
+                Text("Top Players")
+                    .font(.system(size: 23))
+                    .padding(EdgeInsets(top: 30, leading: 20, bottom: 0, trailing: 20))
+                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                Spacer()
+                VStack {
+                    Divider()
+                    HStack {
+                        Text("Members")
+                        Spacer()
+                        Text("8")
+                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                    }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                    
+                    Divider()
+                    
+                    HStack {
+                        Text("Activity")
+                        Spacer()
+                        Text("42")
+                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                    }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                    Divider()
+                }
+            }.padding(.top, -80)
+            
+        }
+    }
+}
+
+struct SubmitMatchView: View {
+    var body: some View {
+        Text("Submit Match Screen")
+    }
+}
+
 struct SearchView: View {
     var body: some View {
         Text("Search Screen")
+    }
+}
+
+struct BoardMembersView: View {
+    var body: some View {
+        Text("Board Members")
+    }
+}
+
+struct BoardActivityView: View {
+    var body: some View {
+        Text("Board Activity")
     }
 }
 
