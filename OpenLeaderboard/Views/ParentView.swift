@@ -27,37 +27,61 @@ struct Boards: Codable, Hashable {
     public var losses: Int
 }
 
+struct Profile: Codable {
+    
+    //init(from:) {}
+    
+    public var user_id = 0
+    public var name = ""
+    public var board_count = 0
+    public var matches_count = 0
+    public var favourite_boards: [Boards]
+    
+}
+
+struct Activities: Codable {
+    let matches: [Activity]
+}
+
+struct Activity: Codable, Hashable {
+    
+    public var board_name = ""
+    public var opponent_name = ""
+    public var rating_change = 0.0
+    public var result = ""
+}
+
 struct TabParent: View {
     
     @EnvironmentObject var userData: UserData
     
     var body: some View {
         TabView {
-            ProfileView()
-             .tabItem {
-                Image(systemName: "person.fill")
-                Text("Profile")
-              }
+            ProfileView(accessToken: userData.access_token)
+                .tabItem {
+                    Image(systemName: "person.fill")
+                    Text("Profile")
+                }
             MainBoardsView(accessToken: userData.access_token)
-              .tabItem {
-                 Image(systemName: "list.bullet")
-                 Text("Boards")
-               }
+                .tabItem {
+                    Image(systemName: "list.bullet")
+                    Text("Boards")
+                }
             AddBoardView(accessToken: userData.access_token)
-              .tabItem {
-                 Image(systemName: "plus")
-                 Text("Add Board")
-               }
+                .tabItem {
+                    Image(systemName: "plus")
+                    Text("Add Board")
+                }
             SearchView()
-              .tabItem {
-                 Image(systemName: "magnifyingglass")
-                 Text("Search")
-               }
+                .tabItem {
+                    Image(systemName: "magnifyingglass")
+                    Text("Search")
+                }
             NotificationsView()
-              .tabItem {
-                 Image(systemName: "bell.fill")
-                 Text("Notifications")
-               }
+                .tabItem {
+                    Image(systemName: "bell.fill")
+                    Text("Notifications")
+                }
         }
         .accentColor(bgColor)
         .navigationBarTitle("Boards", displayMode: .inline)
@@ -94,7 +118,8 @@ struct MainBoardsView: View {
                                     .font(.system(size: 15))
                                     .foregroundColor(.gray)
                             }
-                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
+                        Spacer()
                         HStack {
                             VStack (alignment: .trailing) {
                                 Text("2100")
@@ -102,9 +127,10 @@ struct MainBoardsView: View {
                                     .font(.system(size: 15))
                                     .foregroundColor(.gray)
                             }
-                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 0)).foregroundColor(.gray)
+                            Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 0)).foregroundColor(.gray)
                         }
-                    }.padding(EdgeInsets(top: 10, leading: -40, bottom: 10, trailing: 0))
+                    }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                    Divider()
                 }
             }
             Spacer()
@@ -112,84 +138,217 @@ struct MainBoardsView: View {
     }
 }
 
-struct AddBoardView: View {
+struct ProfileView: View {
     
     var accessToken: String
-    @State var board_name: String = ""
-    @State var isPublic: Bool = true;
+    @ObservedObject var fetchProfile: FetchProfile
     
     init(accessToken: String) {
         self.accessToken = accessToken
+        self.fetchProfile = FetchProfile(accessToken: accessToken)
     }
     
     var body: some View {
-        VStack (alignment: .leading) {
-            Text("Board Information")
-                .fontWeight(.bold)
-                .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
-            TextField("Board Name...", text: $board_name)
-                .padding()
-                .background(lightGray)
-                .shadow(radius: 8)
-                .cornerRadius(20.0)
-                .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
-            Text("Privacy Settings")
-                .fontWeight(.bold)
-                .padding(EdgeInsets(top: 0, leading: 0, bottom: 15, trailing: 0))
-            HStack {
-                Image(systemName: "eye.fill")
-                Text("Public")
-                    .frame(alignment: .leading)
-                    .onTapGesture {
-                        isPublic.toggle()
+        NavigationView {
+            VStack{
+                Text("\(fetchProfile.name)").font(.largeTitle).bold()
+                Divider()
+                Text("Top Boards").font(.system(size: 23)).padding(.top, 30)
+                VStack (alignment: .leading) {
+                    ForEach(fetchProfile.favourite_boards, id: \.self) { board in
+                        HStack {
+                            HStack {
+                                Image(systemName: "seal.fill").foregroundColor(platinum).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                                VStack (alignment: .leading) {
+                                    Text(board.board_name)
+                                    Text("#\(board.rank) of \(board.users_count)")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                            }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                            Spacer()
+                            HStack {
+                                VStack (alignment: .trailing) {
+                                    Text(String(format: "%.1f", board.rating))
+                                    Text("\(board.wins)W / \(board.losses)L")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                        }
+                        Divider()
                     }
-            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
-            .foregroundColor(isPublic ? bgColor : .gray)
-            HStack {
-                Image(systemName: "eye.slash.fill")
-                Text("Private")
-                    .frame(alignment: .leading)
-                    .onTapGesture {
-                        isPublic.toggle()
-                    }
-            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 75, trailing: 0))
-            .foregroundColor(isPublic ? .gray : bgColor)
-            Button(action: addBoard){
-                HStack(alignment: .center) {
-                    Spacer()
-                    Text("Create Board").foregroundColor(.white).bold()
-                    Spacer()
+                }.padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
+                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                Spacer()
+                
+                VStack {
+                    Divider()
+                    HStack {
+                        NavigationLink(
+                            destination: ProfileBoards(),
+                            label: {
+                                Text("All Boards")
+                            })
+                            .buttonStyle(PlainButtonStyle())
+                        Spacer()
+                        Text("8")
+                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                    }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                    
+                    Divider()
+                    
+                    HStack {
+                        NavigationLink(
+                            destination: ProfileActivity(accessToken: accessToken),
+                            label: {
+                                Text("My Activity")
+                            })
+                            .buttonStyle(PlainButtonStyle())
+                        Spacer()
+                        Text("42")
+                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                    }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                    Divider()
                 }
-            }
-            .padding().background(bgColor)
-            .cornerRadius(20.0)
-            .buttonStyle(PlainButtonStyle())
-        }.padding(30)
+            }.padding(.top, -80)
+            
+        }
+    }
+}
+
+
+struct ProfileBoards: View {
+    
+    var body: some View {
+        Text("Boards you are invloved with will appear here")
+    }
+}
+
+struct ProfileActivity: View {
+    
+    var accessToken: String
+    @ObservedObject var fetchactivity: FetchActivity
+    
+    init(accessToken: String) {
+        self.accessToken = accessToken
+        self.fetchactivity = FetchActivity(accessToken: accessToken)
     }
     
-    func addBoard() {
-        print("clicked")
-    }
-}
-
-
-struct SearchView: View {
     var body: some View {
-        Text("Search Screen")
+        NavigationView {
+            VStack{
+                ScrollView{}.navigationBarTitle("My Activity", displayMode: .inline)
+                VStack (alignment: .leading) {
+                    ForEach(fetchactivity.activities, id: \.self) { activity in
+                        HStack {
+                            HStack {
+                                VStack (alignment: .leading) {
+                                    Text(activity.board_name)
+                                    Text("Played \(activity.opponent_name)")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                            }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
+                            Spacer()
+                            HStack {
+                                VStack (alignment: .trailing) {
+                                    Text(activity.result)
+                                    Text("\(activity.rating_change.rounded())")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                            Divider()
+                        }
+                    }
+                }
+                Spacer()
+            }.padding(.top, -80)
+        }
     }
 }
-
-struct NotificationsView: View {
-    var body: some View {
-        Text("Notifications Screen")
+    
+    
+    
+    struct AddBoardView: View {
+        
+        var accessToken: String
+        @State var board_name: String = ""
+        @State var isPublic: Bool = true;
+        
+        init(accessToken: String) {
+            self.accessToken = accessToken
+        }
+        
+        var body: some View {
+            VStack (alignment: .leading) {
+                Text("Board Information")
+                    .fontWeight(.bold)
+                    .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                TextField("Board Name...", text: $board_name)
+                    .padding()
+                    .background(lightGray)
+                    .shadow(radius: 8)
+                    .cornerRadius(20.0)
+                    .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                Text("Privacy Settings")
+                    .fontWeight(.bold)
+                    .padding(EdgeInsets(top: 0, leading: 0, bottom: 15, trailing: 0))
+                HStack {
+                    Image(systemName: "eye.fill")
+                    Text("Public")
+                        .frame(alignment: .leading)
+                        .onTapGesture {
+                            isPublic.toggle()
+                        }
+                }.padding(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
+                .foregroundColor(isPublic ? bgColor : .gray)
+                HStack {
+                    Image(systemName: "eye.slash.fill")
+                    Text("Private")
+                        .frame(alignment: .leading)
+                        .onTapGesture {
+                            isPublic.toggle()
+                        }
+                }.padding(EdgeInsets(top: 0, leading: 0, bottom: 75, trailing: 0))
+                .foregroundColor(isPublic ? .gray : bgColor)
+                Button(action: addBoard){
+                    HStack(alignment: .center) {
+                        Spacer()
+                        Text("Create Board").foregroundColor(.white).bold()
+                        Spacer()
+                    }
+                }
+                .padding().background(bgColor)
+                .cornerRadius(20.0)
+                .buttonStyle(PlainButtonStyle())
+            }.padding(30)
+        }
+        
+        func addBoard() {
+            print("clicked")
+        }
     }
-}
-
-struct ParentView_Previews: PreviewProvider {
-    static var previews: some View {
-        TabParent().environmentObject(UserData())
+    
+    
+    struct SearchView: View {
+        var body: some View {
+            Text("Search Screen")
+        }
     }
-}
+    
+    struct NotificationsView: View {
+        var body: some View {
+            Text("Notifications Screen")
+        }
+    }
+    
+    struct ParentView_Previews: PreviewProvider {
+        static var previews: some View {
+            TabParent().environmentObject(UserData())
+        }
+    }
 
 //ForEach(fetchBoards.boards, id: \.self) { board in
 //    HStack {
