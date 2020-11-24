@@ -693,11 +693,7 @@ struct SubmitMatchView: View {
                     Text("Board")
                     Spacer()
                     VStack (alignment: .trailing) {
-                        if (self.selectedBoard.board_name != "") {
-                            Text("\(self.selectedBoard.board_name)").foregroundColor(.gray)
-                        } else {
-                            Text("No board selected").foregroundColor(.gray)
-                        }
+                        Text((self.selectedBoard.board_name != "" ? "\(self.selectedBoard.board_name)" : "No board selected")).foregroundColor(.gray)
                     }
                 }.onTapGesture {
                     self.boardExpansion = !self.boardExpansion
@@ -739,11 +735,7 @@ struct SubmitMatchView: View {
                     Text("Opponent")
                     Spacer()
                     VStack (alignment: .trailing) {
-                        if (self.selectedOpponent.name != "") {
-                            Text("\(self.selectedOpponent.name)").foregroundColor(.gray)
-                        } else {
-                            Text("No opponent selected").foregroundColor(.gray)
-                        }
+                        Text((self.selectedOpponent.name != "" ? "\(self.selectedOpponent.name)" : "No opponent selected")).foregroundColor(.gray)
                     }
                 }.onTapGesture {
                     self.opponentExpansion = !self.opponentExpansion
@@ -782,11 +774,7 @@ struct SubmitMatchView: View {
                     Text("Result")
                     Spacer()
                     VStack (alignment: .trailing) {
-                        if (self.selectedResult != "") {
-                            Text("\(self.selectedResult)").foregroundColor(.gray)
-                        } else {
-                            Text("No result selected").foregroundColor(.gray)
-                        }
+                        Text((self.selectedResult != "" ? "\(self.selectedResult)" : "No result selected")).foregroundColor(.gray)
                     }
                 }.onTapGesture {
                     self.resultExpansion = !self.resultExpansion
