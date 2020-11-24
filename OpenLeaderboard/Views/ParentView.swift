@@ -14,20 +14,23 @@ let bronze = Color(red: 221.0/255.0, green: 167.0/255.0, blue: 123.0/255.0, opac
 let silver = Color(red: 198.0/255.0, green: 185.0/255.0, blue: 169.0/255.0, opacity: 1.0)
 let gold = Color(red: 255.0/255.0, green: 191.0/255.0, blue: 0.0/255.0, opacity: 1.0)
 let platinum = Color(red: 152.0/255.0, green: 193.0/255.0, blue: 217.0/255.0, opacity: 1.0)
+let thumbsUp = Color(red: 61.0/255.0, green: 126.0/255.0, blue: 164.0/255.0, opacity: 1.0)
+let thumbsDown = Color(red: 83.0/255.0, green: 58.0/255.0, blue: 123.0/255.0, opacity: 1.0)
+let tie = Color(red: 152.0/255.0, green: 193.0/255.0, blue: 217.0/255.0, opacity: 1.0)
 
 struct Initial: Codable {
     let boards: [Boards]
 }
 
 struct Boards: Codable, Hashable {
-    public var board_id: Int
-    public var board_name: String
-    public var rank_icon: Int
-    public var rank: Int
-    public var users_count: Int
-    public var rating: Double
-    public var wins: Int
-    public var losses: Int
+    public var board_id = 0
+    public var board_name = ""
+    public var rank_icon = 0
+    public var rank = 0
+    public var users_count = 0
+    public var rating = 0.0
+    public var wins = 0
+    public var losses = 0
 }
 
 struct Profile: Codable {
@@ -576,36 +579,34 @@ struct BoardDetails: View {
     }
     
     var body: some View {
+        VStack {
+            Text("Top Players")
+                .font(.system(size: 23))
+                .padding(EdgeInsets(top: 30, leading: 20, bottom: 0, trailing: 20))
+                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+            Spacer()
             VStack {
-                Text("\(self.board.board_name)").font(.largeTitle).bold()
                 Divider()
-                Text("Top Players")
-                    .font(.system(size: 23))
-                    .padding(EdgeInsets(top: 30, leading: 20, bottom: 0, trailing: 20))
-                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-                Spacer()
-                VStack {
-                    Divider()
-                    NavigationLink(destination: BoardMembersView(accessToken: accessToken, boardId: self.board.board_id)) {
-                        HStack {
-                            Text("Members").foregroundColor(Color(UIColor.label))
-                            Spacer()
-                            Text("8").foregroundColor(Color(UIColor.label))
-                            Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
-                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
-                    }
-                    Divider()
-                    NavigationLink(destination: BoardActivity(accessToken: accessToken, boardId: self.board.board_id)) {
-                        HStack {
-                            Text("Activity").foregroundColor(Color(UIColor.label))
-                            Spacer()
-                            Text("42").foregroundColor(Color(UIColor.label))
-                            Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
-                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
-                    }
-                    Divider()
+                NavigationLink(destination: BoardMembersView(accessToken: accessToken, boardId: self.board.board_id)) {
+                    HStack {
+                        Text("Members").foregroundColor(Color(UIColor.label))
+                        Spacer()
+                        Text("8").foregroundColor(Color(UIColor.label))
+                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                    }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
                 }
-            }.padding(.top, -80)
+                Divider()
+                NavigationLink(destination: BoardActivity(accessToken: accessToken, boardId: self.board.board_id)) {
+                    HStack {
+                        Text("Activity").foregroundColor(Color(UIColor.label))
+                        Spacer()
+                        Text("42").foregroundColor(Color(UIColor.label))
+                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                    }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                }
+                Divider()
+            }
+        }.navigationBarTitle(Text("\(board.board_name)"), displayMode: .inline)
     }
 }
 
@@ -630,7 +631,7 @@ struct BoardMembersView: View {
                             Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: member.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                             VStack (alignment: .leading) {
                                 Text(member.name)
-                                Text("\(member.rank)")
+                                Text("#\(member.rank)")
                                     .font(.system(size: 15))
                                     .foregroundColor(.gray)
                             }
@@ -638,7 +639,7 @@ struct BoardMembersView: View {
                         Spacer()
                         HStack {
                             VStack (alignment: .trailing) {
-                                Text("\(member.rank, specifier: "%.1f")")
+                                Text("\(member.rating, specifier: "%.0f")")
                                 Text("\(member.wins)W / \(member.losses)L")
                                     .font(.system(size: 15))
                                     .foregroundColor(.gray)
@@ -650,7 +651,7 @@ struct BoardMembersView: View {
             }
             Spacer()
             Spacer()
-        }.navigationBarTitle(Text("My Boards"), displayMode: .inline)
+        }.navigationBarTitle(Text("Board Members"), displayMode: .inline)
     }
     
     func getIconColor(iconInt: Int) -> Color {
@@ -671,8 +672,13 @@ struct BoardMembersView: View {
 struct SubmitMatchView: View {
     
     var accessToken: String
-    @State private var menuIndex: Int = 0
-    @State private var navigateTo: String? = nil
+    @State var boardExpansion: Bool = false
+    @State var opponentExpansion: Bool = false
+    @State var resultExpansion: Bool = false
+    @State var selectedBoard: Boards = Boards()
+    @State var selectedOpponent: BoardMembersModel = BoardMembersModel()
+    @State var selectedResult: String = ""
+    @State var fetchBoardMembers: FetchBoardMembers = FetchBoardMembers(accessToken: "",  boardID: 0)
     @ObservedObject var fetchBoards: FetchBoards
     
     init(accessToken: String) {
@@ -682,35 +688,154 @@ struct SubmitMatchView: View {
     
     var body: some View {
         NavigationView {
-            VStack (alignment: .leading) {
-                ForEach(fetchBoards.boards, id: \.self) { board in
-                    HStack {
-                        HStack {
-                            Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
-                            VStack (alignment: .leading) {
-                                Text(board.board_name)
-                                    .foregroundColor(Color(UIColor.label))
-                                Text("#\(board.rank) of \(board.users_count)")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.gray)
+            List {
+                HStack {
+                    Text("Board")
+                    Spacer()
+                    VStack (alignment: .trailing) {
+                        if (self.selectedBoard.board_name != "") {
+                            Text("\(self.selectedBoard.board_name)").foregroundColor(.gray)
+                        } else {
+                            Text("No board selected").foregroundColor(.gray)
+                        }
+                    }
+                }.onTapGesture {
+                    self.boardExpansion = !self.boardExpansion
+                }; if self.boardExpansion {
+                    VStack (alignment: .leading) {
+                        ForEach(fetchBoards.boards, id: \.self) { board in
+                            HStack {
+                                HStack {
+                                    Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
+                                    VStack (alignment: .leading) {
+                                        Text(board.board_name)
+                                            .foregroundColor(Color(UIColor.label))
+                                        Text("#\(board.rank) of \(board.users_count)")
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.gray)
+                                    }
+                                }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                Spacer()
+                                HStack {
+                                    VStack (alignment: .trailing) {
+                                        Text(String(format: "%.1f", board.rating))
+                                            .foregroundColor(Color(UIColor.label))
+                                        Text("\(board.wins)W / \(board.losses)L")
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.gray)
+                                    }
+                                }.padding(EdgeInsets(top: 10, leading: 0, bottom: 5, trailing: 20))
                             }
-                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
-                        Spacer()
-                        HStack {
-                            VStack (alignment: .trailing) {
-                                Text(String(format: "%.1f", board.rating))
-                                    .foregroundColor(Color(UIColor.label))
-                                Text("\(board.wins)W / \(board.losses)L")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.gray)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                self.boardExpansion = !self.boardExpansion
+                                self.selectedBoard = board
+                                self.fetchBoardMembers = FetchBoardMembers(accessToken: self.accessToken, boardID: board.board_id)
                             }
                         }
-                    .padding(EdgeInsets(top: 10, leading: 0, bottom: 5, trailing: 20))
                     }
                 }
+                HStack {
+                    Text("Opponent")
+                    Spacer()
+                    VStack (alignment: .trailing) {
+                        if (self.selectedOpponent.name != "") {
+                            Text("\(self.selectedOpponent.name)").foregroundColor(.gray)
+                        } else {
+                            Text("No opponent selected").foregroundColor(.gray)
+                        }
+                    }
+                }.onTapGesture {
+                    self.opponentExpansion = !self.opponentExpansion
+                }; if (self.opponentExpansion && self.selectedBoard.board_name != "") {
+                    VStack (alignment: .leading) {
+                        ForEach(self.fetchBoardMembers.boardMembers, id: \.self) { opponent in
+                            HStack {
+                                HStack {
+                                    Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: opponent.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                                    VStack (alignment: .leading) {
+                                        Text(opponent.name)
+                                        Text("#\(opponent.rank)")
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.gray)
+                                    }
+                                }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                Spacer()
+                                HStack {
+                                    VStack (alignment: .trailing) {
+                                        Text("\(opponent.rating, specifier: "%.0f")")
+                                        Text("\(opponent.wins)W / \(opponent.losses)L")
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.gray)
+                                    }
+                                }.padding(EdgeInsets(top: 10, leading: 0, bottom: 5, trailing: 20))
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                self.opponentExpansion = !self.opponentExpansion
+                                self.selectedOpponent = opponent
+                            }
+                            }
+                        }
+                    }
+                HStack {
+                    Text("Result")
+                    Spacer()
+                    VStack (alignment: .trailing) {
+                        if (self.selectedResult != "") {
+                            Text("\(self.selectedResult)").foregroundColor(.gray)
+                        } else {
+                            Text("No result selected").foregroundColor(.gray)
+                        }
+                    }
+                }.onTapGesture {
+                    self.resultExpansion = !self.resultExpansion
+                }; if (self.resultExpansion && self.selectedOpponent.name != "") {
+                        VStack (alignment: .center) {
+                            HStack {
+                                VStack {
+                                    Image(systemName: "hand.thumbsup.fill").foregroundColor((self.selectedResult == "Win" || self.selectedResult == "" ? thumbsUp : .gray))
+                                        .font(.system(size: 100))
+                                    Text("Win")
+                                }.onTapGesture {
+                                    self.selectedResult = "Win"
+                                }
+                                .padding(EdgeInsets(top: 20, leading: 20, bottom: 0, trailing: 0))
+                                Spacer()
+                                VStack {
+                                    Image(systemName: "hand.thumbsdown.fill").foregroundColor((self.selectedResult == "Loss" || self.selectedResult == "" ? thumbsDown : .gray))
+                                        .font(.system(size: 100))
+                                    Text("Loss")
+                                }.onTapGesture {
+                                    self.selectedResult = "Loss"
+                                }.padding(EdgeInsets(top: 20, leading: 0, bottom: 0, trailing: 20))
+                            }
+                            VStack {
+                                Image(systemName: "hands.clap.fill").foregroundColor((self.selectedResult == "Tie" || self.selectedResult == "" ? tie : .gray))
+                                    .font(.system(size: 100))
+                                Text("Tie")
+                            }.onTapGesture {
+                                self.selectedResult = "Tie"
+                            }.padding(EdgeInsets(top: 20, leading: 0, bottom: 20, trailing: 0))
+                            Button(action: submitMatch) {
+                                HStack(alignment: .center) {
+                                    Spacer()
+                                    Text("Submit Match").foregroundColor(btnColor).bold()
+                                    Spacer()
+                                }
+                            }.padding()
+                            .background(bgColor)
+                            .cornerRadius(20.0)
+                            .buttonStyle(PlainButtonStyle())
+                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                    }
+                }.navigationBarTitle(Text("Submit Match"), displayMode: .inline)
             }
-            Spacer()
-        }.navigationBarTitle(Text("Submit Match"), displayMode: .inline)
+            .listStyle(GroupedListStyle())
+    }
+    
+    func submitMatch() {
+        print("submit match")
     }
     
     func getIconColor(iconInt: Int) -> Color {

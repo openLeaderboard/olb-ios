@@ -173,9 +173,6 @@ class FetchBoardsActivity: ObservableObject {
                     print("No activity data was returned!")
                 }
             } catch {
-                print(String(data: data!, encoding: .utf8))
-                print(data)
-                print(response)
                 print("There was an error getting activity data!")
             }
         }.resume()
@@ -212,9 +209,6 @@ class FetchBoardMembers: ObservableObject {
                     print("No activity data was returned!")
                 }
             } catch {
-                print(String(data: data!, encoding: .utf8))
-                print(data)
-                print(response)
                 print("There was an error getting activity data!")
             }
         }.resume()
