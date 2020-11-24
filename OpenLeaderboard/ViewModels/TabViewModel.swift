@@ -173,8 +173,51 @@ class FetchBoardsActivity: ObservableObject {
                     print("No activity data was returned!")
                 }
             } catch {
+                print(String(data: data!, encoding: .utf8))
+                print(data)
+                print(response)
                 print("There was an error getting activity data!")
             }
         }.resume()
     }
 }
+
+class FetchBoardMembers: ObservableObject {
+
+    @Published var boardMembers = [BoardMembersModel]()
+    
+    var accessToken: String
+    var boardID: Int
+    
+    init(accessToken: String, boardID: Int) {
+        self.accessToken = accessToken
+        self.boardID = boardID
+        let url = URL(string: (apiURL + "/board/\(self.boardID)/members"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let boardMemberData = data {
+                    let decodedData = try JSONDecoder().decode(BoardMembers.self, from: boardMemberData)
+                    let decodedActivities = decodedData.members
+                    
+                DispatchQueue.main.async {
+                    self.boardMembers = decodedActivities
+                }
+                } else {
+                    print("No activity data was returned!")
+                }
+            } catch {
+                print(String(data: data!, encoding: .utf8))
+                print(data)
+                print(response)
+                print("There was an error getting activity data!")
+            }
+        }.resume()
+    }
+}
+
