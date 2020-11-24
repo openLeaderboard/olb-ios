@@ -66,12 +66,12 @@ struct BoardMembers: Codable {
 
 struct BoardMembersModel: Codable, Hashable {
     public var name = ""
-    public var user_id = 0.0
-    public var rank_icon = 0.0
-    public var rank = 0.0
+    public var user_id = 0
+    public var rank_icon = 0
+    public var rank = 0
     public var rating = 0.0
-    public var wins = 0.0
-    public var losses = 0.0
+    public var wins = 0
+    public var losses = 0
 }
 
 struct TabParent: View {
@@ -380,7 +380,7 @@ struct ProfileView: View {
                     ForEach(fetchProfile.favourite_boards, id: \.self) { board in
                         HStack {
                             HStack {
-                                Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                                Image(systemName: "seal.fill").foregroundColor(platinum).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                                 VStack (alignment: .leading) {
                                     Text(board.board_name)
                                     Text("#\(board.rank) of \(board.users_count)")
@@ -429,19 +429,6 @@ struct ProfileView: View {
             
         }
     }
-    
-    func getIconColor(iconInt: Int) -> Color {
-        switch iconInt {
-        case 1:
-            return platinum
-        case 2:
-            return gold
-        case 3:
-            return silver
-        default:
-            return bronze
-        }
-    }
 }
 
 struct ProfileBoards: View {
@@ -460,7 +447,7 @@ struct ProfileBoards: View {
                 ForEach(fetchBoards.boards, id: \.self) { board in
                     HStack {
                         HStack {
-                            Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0));
+                            Image(systemName: "seal.fill").foregroundColor(platinum).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                             VStack (alignment: .leading) {
                                 Text(board.board_name)
                                 Text("#\(board.rank) of \(board.users_count)")
@@ -484,19 +471,6 @@ struct ProfileBoards: View {
             Spacer()
             Spacer()
         }.navigationBarTitle(Text("My Boards"), displayMode: .inline)
-    }
-    
-    func getIconColor(iconInt: Int) -> Color {
-        switch iconInt {
-        case 1:
-            return platinum
-        case 2:
-            return gold
-        case 3:
-            return silver
-        default:
-            return bronze
-        }
     }
 }
 
@@ -656,7 +630,7 @@ struct BoardMembersView: View {
                             Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: member.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                             VStack (alignment: .leading) {
                                 Text(member.name)
-                                Text(member.rank)
+                                Text("\(member.rank)")
                                     .font(.system(size: 15))
                                     .foregroundColor(.gray)
                             }
@@ -664,7 +638,7 @@ struct BoardMembersView: View {
                         Spacer()
                         HStack {
                             VStack (alignment: .trailing) {
-                                Text(member.rating)
+                                Text("\(member.rank, specifier: "%.1f")")
                                 Text("\(member.wins)W / \(member.losses)L")
                                     .font(.system(size: 15))
                                     .foregroundColor(.gray)
