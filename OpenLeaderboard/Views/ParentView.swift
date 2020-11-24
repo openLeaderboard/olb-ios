@@ -54,11 +54,24 @@ struct BoardActivities: Codable {
 }
 
 struct BoardActivityModel: Codable, Hashable {
-    
     public var submitter_name = ""
     public var receiver_name = ""
-    public var submitter_result = 0.0
+    public var submitter_result = ""
     public var receiver_result = ""
+}
+
+struct BoardMembers: Codable {
+    let members: [BoardMembersModel]
+}
+
+struct BoardMembersModel: Codable, Hashable {
+    public var name = ""
+    public var user_id = 0.0
+    public var rank_icon = 0.0
+    public var rank = 0.0
+    public var rating = 0.0
+    public var wins = 0.0
+    public var losses = 0.0
 }
 
 struct TabParent: View {
@@ -307,6 +320,7 @@ struct AddBoardView: View {
             .cornerRadius(20.0)
             .buttonStyle(PlainButtonStyle())
         }.padding(30)
+        .navigationBarTitle(Text("Create Board"), displayMode: .inline)
     }
     
     func addBoard() {
@@ -497,8 +511,7 @@ struct ProfileActivity: View {
     }
     
     var body: some View {
-        VStack{
-            //ScrollView{}.navigationBarTitle("My Activity", displayMode: .inline)
+        VStack {
             VStack (alignment: .leading) {
                 ForEach(fetchactivity.activities, id: \.self) { activity in
                     HStack {
@@ -555,7 +568,7 @@ struct BoardActivity: View {
                         HStack {
                             VStack (alignment: .leading) {
                                 Text(activity.submitter_name)
-                                Text("Played \(activity.receiver_name)")
+                                Text(activity.submitter_result)
                                     .font(.system(size: 15))
                                     .foregroundColor(.gray)
                             }
@@ -563,17 +576,10 @@ struct BoardActivity: View {
                         Spacer()
                         HStack {
                             VStack (alignment: .trailing) {
+                                Text(activity.receiver_name)
                                 Text(activity.receiver_result)
-                                if activity.submitter_result > 0 {
-                                    Text("+\(activity.submitter_result, specifier: "%.1f")")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(.gray)
-                                }else{
-                                    Text("\(activity.submitter_result, specifier: "%.1f")")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(.gray)
-                                }
-                                    
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.gray)
                             }
                         }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
                     }.frame(height: 55)
@@ -596,7 +602,6 @@ struct BoardDetails: View {
     }
     
     var body: some View {
-        NavigationView {
             VStack {
                 Text("\(self.board.board_name)").font(.largeTitle).bold()
                 Divider()
@@ -607,7 +612,7 @@ struct BoardDetails: View {
                 Spacer()
                 VStack {
                     Divider()
-                    NavigationLink(destination: ProfileBoards(accessToken: accessToken)) {
+                    NavigationLink(destination: BoardMembersView(accessToken: accessToken, boardId: self.board.board_id)) {
                         HStack {
                             Text("Members").foregroundColor(Color(UIColor.label))
                             Spacer()
@@ -627,8 +632,66 @@ struct BoardDetails: View {
                     Divider()
                 }
             }.padding(.top, -80)
+    }
+}
+
+struct BoardMembersView: View {
+    
+    var accessToken: String
+    var boardId: Int
+    @ObservedObject var fetchMembers: FetchBoardMembers
+    
+    init(accessToken: String, boardId: Int) {
+        self.accessToken = accessToken
+        self.boardId = boardId
+        self.fetchMembers = FetchBoardMembers(accessToken: accessToken,  boardID: self.boardId)
+    }
+    
+    var body: some View {
+        VStack {
+            VStack (alignment: .leading) {
+                ForEach(fetchMembers.boardMembers, id: \.self) { member in
+                    HStack {
+                        HStack {
+                            Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: member.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                            VStack (alignment: .leading) {
+                                Text(member.name)
+                                Text(member.rank)
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.gray)
+                            }
+                        }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
+                        Spacer()
+                        HStack {
+                            VStack (alignment: .trailing) {
+                                Text(member.rating)
+                                Text("\(member.wins)W / \(member.losses)L")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                    Divider()
+                }
+            }
+            Spacer()
+            Spacer()
+        }.navigationBarTitle(Text("My Boards"), displayMode: .inline)
+    }
+    
+    func getIconColor(iconInt: Int) -> Color {
+        switch iconInt {
+        case 1:
+            return platinum
+        case 2:
+            return gold
+        case 3:
+            return silver
+        default:
+            return bronze
         }
     }
+    
 }
 
 struct SubmitMatchView: View {
@@ -694,12 +757,6 @@ struct SubmitMatchView: View {
 struct SearchView: View {
     var body: some View {
         Text("Search Screen")
-    }
-}
-
-struct BoardMembersView: View {
-    var body: some View {
-        Text("Board Members")
     }
 }
 
