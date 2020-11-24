@@ -366,7 +366,7 @@ struct ProfileView: View {
                     ForEach(fetchProfile.favourite_boards, id: \.self) { board in
                         HStack {
                             HStack {
-                                Image(systemName: "seal.fill").foregroundColor(platinum).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                                Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                                 VStack (alignment: .leading) {
                                     Text(board.board_name)
                                     Text("#\(board.rank) of \(board.users_count)")
@@ -415,6 +415,19 @@ struct ProfileView: View {
             
         }
     }
+    
+    func getIconColor(iconInt: Int) -> Color {
+        switch iconInt {
+        case 1:
+            return platinum
+        case 2:
+            return gold
+        case 3:
+            return silver
+        default:
+            return bronze
+        }
+    }
 }
 
 struct ProfileBoards: View {
@@ -433,7 +446,7 @@ struct ProfileBoards: View {
                 ForEach(fetchBoards.boards, id: \.self) { board in
                     HStack {
                         HStack {
-                            Image(systemName: "seal.fill").foregroundColor(platinum).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                            Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0));
                             VStack (alignment: .leading) {
                                 Text(board.board_name)
                                 Text("#\(board.rank) of \(board.users_count)")
@@ -457,6 +470,19 @@ struct ProfileBoards: View {
             Spacer()
             Spacer()
         }.navigationBarTitle(Text("My Boards"), displayMode: .inline)
+    }
+    
+    func getIconColor(iconInt: Int) -> Color {
+        switch iconInt {
+        case 1:
+            return platinum
+        case 2:
+            return gold
+        case 3:
+            return silver
+        default:
+            return bronze
+        }
     }
 }
 
