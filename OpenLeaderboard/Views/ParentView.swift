@@ -33,6 +33,16 @@ struct Boards: Codable, Hashable {
     public var losses = 0
 }
 
+struct AllUsers: Codable {
+    let search_result: [Users]
+}
+
+struct Users: Codable, Hashable {
+    public var id = 0
+    public var name = ""
+    public var board_count = 0
+}
+
 struct Profile: Codable {
     public var user_id = 0
     public var name = ""
@@ -114,6 +124,7 @@ struct TabParent: View {
         .navigationBarHidden(false)
     }
 }
+
 
 struct MainBoardsView: View {
     
@@ -413,16 +424,16 @@ struct ProfileView: View {
                         HStack {
                             Text("My Boards").foregroundColor(Color(UIColor.label))
                             Spacer()
-                            Text("8").foregroundColor(Color(UIColor.label))
+                            Text("\(fetchProfile.board_count)").foregroundColor(Color(UIColor.label))
                             Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                         }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
                     }
                     Divider()
-                    NavigationLink(destination: ProfileBoards(accessToken: accessToken)) {
+                    NavigationLink(destination: ProfileActivity(accessToken: accessToken)) {
                         HStack {
                             Text("My Activity").foregroundColor(Color(UIColor.label))
                             Spacer()
-                            Text("42").foregroundColor(Color(UIColor.label))
+                            Text("").foregroundColor(Color(UIColor.label))
                             Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                         }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
                     }
@@ -591,7 +602,7 @@ struct BoardDetails: View {
                     HStack {
                         Text("Members").foregroundColor(Color(UIColor.label))
                         Spacer()
-                        Text("8").foregroundColor(Color(UIColor.label))
+                        Text("\(board.users_count)").foregroundColor(Color(UIColor.label))
                         Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                     }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
                 }
@@ -600,7 +611,6 @@ struct BoardDetails: View {
                     HStack {
                         Text("Activity").foregroundColor(Color(UIColor.label))
                         Spacer()
-                        Text("42").foregroundColor(Color(UIColor.label))
                         Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                     }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
                 }
@@ -611,6 +621,8 @@ struct BoardDetails: View {
 }
 
 struct BoardMembersView: View {
+    
+    @State var selectedTag: String?
     
     var accessToken: String
     var boardId: Int
@@ -639,7 +651,7 @@ struct BoardMembersView: View {
                         Spacer()
                         HStack {
                             VStack (alignment: .trailing) {
-                                Text("\(member.rating, specifier: "%.0f")")
+                                Text("\(member.rating, specifier: "%.1f")")
                                 Text("\(member.wins)W / \(member.losses)L")
                                     .font(.system(size: 15))
                                     .foregroundColor(.gray)
@@ -651,7 +663,19 @@ struct BoardMembersView: View {
             }
             Spacer()
             Spacer()
+
         }.navigationBarTitle(Text("Board Members"), displayMode: .inline)
+        .navigationBarItems(trailing: Button(action: {}) {
+            VStack {
+                
+                Spacer()
+                NavigationLink(destination: AddMemberView(accessToken: accessToken)) {
+                    Image(systemName: "person.fill.badge.plus")
+                            .resizable()
+                            .frame(width: 32.0, height: 32.0)
+                }
+            }
+        })
     }
     
     func getIconColor(iconInt: Int) -> Color {
@@ -840,6 +864,70 @@ struct SubmitMatchView: View {
     }
     
 }
+
+struct AddMemberView: View {
+   
+    
+    var accessToken: String
+    @ObservedObject var fetchUsers: FetchUsers
+    
+    init(accessToken: String) {
+        self.accessToken = accessToken
+        self.fetchUsers = FetchUsers(accessToken: accessToken)
+    }
+    
+        
+    var body: some View {
+        VStack{
+            VStack (alignment: .leading) {
+                ForEach(fetchUsers.userResults, id: \.self) { user in
+                    HStack {
+                        HStack {
+                            VStack (alignment: .leading) {
+                                Text("\(user.name)")
+                                if(user.board_count == 1){
+                                    Text("\(user.board_count) Board")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }else {
+                                    Text("\(user.board_count) Boards")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                                
+                                    
+                            }
+                        }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
+                        Spacer()
+                        HStack {
+                            Button(action: {
+                                //self.navigateTo = "create"
+                            }, label: {
+                                Text("+")
+                                .font(.system(.largeTitle))
+                                    .frame(width: 32, height: 24.5)
+                                .foregroundColor(Color.white)
+                                .padding(.bottom, 7)
+                            })
+                            .background(bgColor)
+                            .cornerRadius(38.5)
+                            .padding()
+                            .shadow(color: Color.black.opacity(0.3),
+                                    radius: 3,
+                                    x: 3,
+                                    y: 3)
+                        }
+                    }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                    Divider()
+                }
+            }
+            Spacer()
+            Spacer()
+        }.navigationBarTitle(Text("Add Member"), displayMode: .inline)
+    }
+}
+
+
 
 struct SearchView: View {
     var body: some View {

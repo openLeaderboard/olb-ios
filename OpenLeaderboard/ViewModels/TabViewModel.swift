@@ -9,6 +9,41 @@
 import Foundation
 import UIKit
 
+class FetchUsers: ObservableObject {
+    
+    @Published var userResults = [Users]()
+    
+    var accessToken: String
+    
+    init(accessToken: String) {
+        self.accessToken = accessToken
+        let url = URL(string: (apiURL + "/user/search"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let usersData = data {
+                    let decodedData = try JSONDecoder().decode(AllUsers.self, from: usersData)
+                    let decodedUsers = decodedData.search_result
+                DispatchQueue.main.async {
+                    self.userResults = decodedUsers
+                    print(self.userResults)
+                }
+                } else {
+                    print("No users data was returned!")
+                }
+            } catch {
+                print("There was an error getting users data: \(error)")
+            }
+        }.resume()
+    }
+}
+
+
 class FetchBoards: ObservableObject {
     
     @Published var boards = [Boards]()
@@ -37,7 +72,6 @@ class FetchBoards: ObservableObject {
                     let decodedBoards = decodedData.boards
                 DispatchQueue.main.async {
                     self.boards = decodedBoards
-                    print(self.boards)
                 }
                 } else {
                     print("No boards data was returned!")
@@ -55,7 +89,6 @@ class FetchBoards: ObservableObject {
                     let decodedBoards = decodedData.boards
                 DispatchQueue.main.async {
                     self.myBoards = decodedBoards
-                    print(self.myBoards)
                 }
                 } else {
                     print("No boards data was returned!")
