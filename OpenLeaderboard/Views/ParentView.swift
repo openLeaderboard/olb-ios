@@ -147,120 +147,126 @@ struct MainBoardsView: View {
                         Text("My Boards").tag(1)
                     }.pickerStyle(SegmentedPickerStyle())
                     if (menuIndex == 0) {
-                        VStack (alignment: .leading) {
-                            ForEach(fetchBoards.boards, id: \.self) { board in
-                                HStack {
-                                    NavigationLink(destination: BoardDetails(accessToken: self.accessToken, currentBoard: board)) {
-                                        HStack {
-                                            Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
-                                            VStack (alignment: .leading) {
-                                                Text(board.board_name)
-                                                    .foregroundColor(Color(UIColor.label))
-                                                Text("#\(board.rank) of \(board.users_count)")
-                                                    .font(.system(size: 15))
-                                                    .foregroundColor(.gray)
+                        ScrollView {
+                            VStack (alignment: .leading) {
+                                ForEach(fetchBoards.boards, id: \.self) { board in
+                                    HStack {
+                                        NavigationLink(destination: BoardDetails(accessToken: self.accessToken, currentBoard: board)) {
+                                            HStack {
+                                                Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
+                                                VStack (alignment: .leading) {
+                                                    Text(board.board_name)
+                                                        .foregroundColor(Color(UIColor.label))
+                                                    Text("#\(board.rank) of \(board.users_count)")
+                                                        .font(.system(size: 15))
+                                                        .foregroundColor(.gray)
+                                                }
+                                            }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                            Spacer()
+                                            HStack {
+                                                VStack (alignment: .trailing) {
+                                                    Text(String(format: "%.1f", board.rating))
+                                                        .foregroundColor(Color(UIColor.label))
+                                                    Text("\(board.wins)W / \(board.losses)L")
+                                                        .font(.system(size: 15))
+                                                        .foregroundColor(.gray)
+                                                }
+                                                Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                                             }
-                                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                        }
+                                        .padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 20))
+                                    }
+                                    Divider()
+                                }
+                                NavigationLink(destination: AddBoardView(accessToken: self.accessToken)) {
+                                VStack {
+                                    Spacer()
+                                        HStack {
                                         Spacer()
-                                        HStack {
-                                            VStack (alignment: .trailing) {
-                                                Text(String(format: "%.1f", board.rating))
-                                                    .foregroundColor(Color(UIColor.label))
-                                                Text("\(board.wins)W / \(board.losses)L")
-                                                    .font(.system(size: 15))
-                                                    .foregroundColor(.gray)
-                                            }
-                                            Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                                            Button(action: {
+                                                self.navigateTo = "create"
+                                            }, label: {
+                                                Text("+")
+                                                .font(.system(.largeTitle))
+                                                .frame(width: 55, height: 48)
+                                                .foregroundColor(Color.white)
+                                                .padding(.bottom, 7)
+                                            })
+                                            .background(bgColor)
+                                            .cornerRadius(38.5)
+                                            .padding()
+                                            .shadow(color: Color.black.opacity(0.3),
+                                                    radius: 3,
+                                                    x: 3,
+                                                    y: 3)
                                         }
                                     }
-                                    .padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 20))
-                                }
-                                Divider()
+                                }.navigationBarTitle(Text("Boards"), displayMode: .inline)
                             }
-                            NavigationLink(destination: AddBoardView(accessToken: self.accessToken)) {
-                            VStack {
-                                Spacer()
-                                    HStack {
-                                    Spacer()
-                                        Button(action: {
-                                            self.navigateTo = "create"
-                                        }, label: {
-                                            Text("+")
-                                            .font(.system(.largeTitle))
-                                            .frame(width: 55, height: 48)
-                                            .foregroundColor(Color.white)
-                                            .padding(.bottom, 7)
-                                        })
-                                        .background(bgColor)
-                                        .cornerRadius(38.5)
-                                        .padding()
-                                        .shadow(color: Color.black.opacity(0.3),
-                                                radius: 3,
-                                                x: 3,
-                                                y: 3)
-                                    }
-                                }
-                            }.navigationBarTitle(Text("All Boards"), displayMode: .inline)
                         }
                     }
                     else {
-                        VStack (alignment: .leading) {
-                            ForEach(fetchBoards.myBoards, id: \.self) { board in
-                                HStack {
-                                    NavigationLink(destination: BoardDetails(accessToken: self.accessToken, currentBoard: board)) {
-                                        HStack {
-                                            Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
-                                            VStack (alignment: .leading) {
-                                                Text(board.board_name)
-                                                    .foregroundColor(Color(UIColor.label))
-                                                Text("#\(board.rank) of \(board.users_count)")
-                                                    .font(.system(size: 15))
-                                                    .foregroundColor(.gray)
-                                            }
-                                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
-                                        Spacer()
-                                        HStack {
-                                            VStack (alignment: .trailing) {
-                                                Text(String(format: "%.1f", board.rating))
-                                                    .foregroundColor(Color(UIColor.label))
-                                                Text("\(board.wins)W / \(board.losses)L")
-                                                    .font(.system(size: 15))
-                                                    .foregroundColor(.gray)
-                                            }
-                                            Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
-                                        }
-                                    }
-                                    .padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 20))
-                                }
-                                Divider()
-                            }
-                            VStack {
-                                Spacer()
-                                NavigationLink(destination: AddBoardView(accessToken: self.accessToken)) {
+                        ScrollView {
+                            VStack (alignment: .leading) {
+                                ForEach(fetchBoards.myBoards, id: \.self) { board in
                                     HStack {
+                                        NavigationLink(destination: BoardDetails(accessToken: self.accessToken, currentBoard: board)) {
+                                            HStack {
+                                                Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
+                                                VStack (alignment: .leading) {
+                                                    Text(board.board_name)
+                                                        .foregroundColor(Color(UIColor.label))
+                                                    Text("#\(board.rank) of \(board.users_count)")
+                                                        .font(.system(size: 15))
+                                                        .foregroundColor(.gray)
+                                                }
+                                            }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                            Spacer()
+                                            HStack {
+                                                VStack (alignment: .trailing) {
+                                                    Text(String(format: "%.1f", board.rating))
+                                                        .foregroundColor(Color(UIColor.label))
+                                                    Text("\(board.wins)W / \(board.losses)L")
+                                                        .font(.system(size: 15))
+                                                        .foregroundColor(.gray)
+                                                }
+                                                Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                                            }
+                                        }
+                                        .padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 20))
+                                    }
+                                    Divider()
+                                }
+                                VStack {
                                     Spacer()
-                                        Button(action: {
-                                            self.navigateTo = "create"
-                                        }, label: {
-                                            Text("+")
-                                            .font(.system(.largeTitle))
-                                            .frame(width: 55, height: 48)
-                                            .foregroundColor(Color.white)
-                                            .padding(.bottom, 7)
-                                        })
-                                        .background(bgColor)
-                                        .cornerRadius(38.5)
-                                        .padding()
-                                        .shadow(color: Color.black.opacity(0.3),
-                                                radius: 3,
-                                                x: 3,
-                                                y: 3)
+                                    NavigationLink(destination: AddBoardView(accessToken: self.accessToken)) {
+                                        HStack {
+                                        Spacer()
+                                            Button(action: {
+                                                self.navigateTo = "create"
+                                            }, label: {
+                                                Text("+")
+                                                .font(.system(.largeTitle))
+                                                .frame(width: 55, height: 48)
+                                                .foregroundColor(Color.white)
+                                                .padding(.bottom, 7)
+                                            })
+                                            .background(bgColor)
+                                            .cornerRadius(38.5)
+                                            .padding()
+                                            .shadow(color: Color.black.opacity(0.3),
+                                                    radius: 3,
+                                                    x: 3,
+                                                    y: 3)
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+            }.onAppear {
+                self.fetchBoards.fetchBoards(accessToken: self.accessToken)
             }
         }
     }
@@ -281,6 +287,7 @@ struct MainBoardsView: View {
 }
 
 struct AddBoardView: View {
+    @Environment(\.presentationMode) var mode: Binding<PresentationMode>
     
     var accessToken: String
     @ObservedObject var addBoardViewModel = AddBoardViewModel()
@@ -323,7 +330,11 @@ struct AddBoardView: View {
                     }
             }.padding(EdgeInsets(top: 0, leading: 0, bottom: 75, trailing: 0))
             .foregroundColor(self.addBoardViewModel.is_public ? .gray : bgColor)
-            Button(action: addBoard){
+            Button(action: {
+                if addBoard() {
+                    self.mode.wrappedValue.dismiss() // pop navigation view back
+                }
+            }){
                 HStack(alignment: .center) {
                     Spacer()
                     Text("Create Board").foregroundColor(.white).bold()
@@ -337,18 +348,20 @@ struct AddBoardView: View {
         .navigationBarTitle(Text("Create Board"), displayMode: .inline)
     }
     
-    func addBoard() {
+    func addBoard() -> Bool {
         
-        struct RegistrationToken: Decodable {
+        struct CreateBoardResponse: Decodable {
             let success: Bool
             let message: String
-            let board_id: String
+            let board_id: Int
         }
+        var success = false
+        let sem = DispatchSemaphore.init(value: 0)
         
         guard let encoded = try? JSONEncoder().encode(addBoardViewModel)
         else {
             print("Failed to encode creation of board rqeuest")
-            return
+            return false
         }
         
         let url = URL(string: (apiURL + "/board/create"))!
@@ -360,17 +373,26 @@ struct AddBoardView: View {
         
         URLSession.shared.dataTask(with: request) {
             data, response, error in
+            defer { sem.signal() } // bad jank
             guard let data = data else {
                 print("No data in response: \(error?.localizedDescription ?? "Unknown error").")
                 return
             }
             
-            if let createBoardResponse = try? JSONDecoder().decode(RegistrationToken.self, from: data) {
+            if let createBoardResponse = try? JSONDecoder().decode(CreateBoardResponse.self, from: data) {
                 print("Board created successfully!")
+                if (createBoardResponse.success) {
+                    success = true
+                }
             } else {
                 print("Invalid response from server")
+                
             }
         }.resume()
+        
+        sem.wait() // bad
+        
+        return success
     }
 }
 
@@ -394,7 +416,7 @@ struct ProfileView: View {
                     ForEach(fetchProfile.favourite_boards, id: \.self) { board in
                         HStack {
                             HStack {
-                                Image(systemName: "seal.fill").foregroundColor(platinum).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                                Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                                 VStack (alignment: .leading) {
                                     Text(board.board_name)
                                     Text("#\(board.rank) of \(board.users_count)")
@@ -422,7 +444,7 @@ struct ProfileView: View {
                     Divider()
                     NavigationLink(destination: ProfileBoards(accessToken: accessToken)) {
                         HStack {
-                            Text("My Boards").foregroundColor(Color(UIColor.label))
+                            Text("Boards").foregroundColor(Color(UIColor.label))
                             Spacer()
                             Text("\(fetchProfile.board_count)").foregroundColor(Color(UIColor.label))
                             Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
@@ -431,9 +453,9 @@ struct ProfileView: View {
                     Divider()
                     NavigationLink(destination: ProfileActivity(accessToken: accessToken)) {
                         HStack {
-                            Text("My Activity").foregroundColor(Color(UIColor.label))
+                            Text("Activity").foregroundColor(Color(UIColor.label))
                             Spacer()
-                            Text("").foregroundColor(Color(UIColor.label))
+                            Text("\(fetchProfile.matches_count)").foregroundColor(Color(UIColor.label))
                             Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                         }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
                     }
@@ -441,6 +463,21 @@ struct ProfileView: View {
                 }
             }.padding(.top, -80)
             
+        }.onAppear {
+            self.fetchProfile.fetchProfile(accessToken: self.accessToken)
+        }
+    }
+    
+    func getIconColor(iconInt: Int) -> Color {
+        switch iconInt {
+        case 1:
+            return platinum
+        case 2:
+            return gold
+        case 3:
+            return silver
+        default:
+            return bronze
         }
     }
 }
@@ -453,85 +490,104 @@ struct ProfileBoards: View {
     init(accessToken: String) {
         self.accessToken = accessToken
         self.fetchBoards = FetchBoards(accessToken: accessToken)
+        self.fetchBoards.fetchBoards(accessToken: self.accessToken)
     }
     
     var body: some View {
         VStack{
-            VStack (alignment: .leading) {
-                ForEach(fetchBoards.boards, id: \.self) { board in
-                    HStack {
+            ScrollView {
+                VStack (alignment: .leading) {
+                    ForEach(fetchBoards.boards, id: \.self) { board in
                         HStack {
-                            Image(systemName: "seal.fill").foregroundColor(platinum).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                            VStack (alignment: .leading) {
-                                Text(board.board_name)
-                                Text("#\(board.rank) of \(board.users_count)")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.gray)
+                            HStack {
+                                Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                                VStack (alignment: .leading) {
+                                    Text(board.board_name)
+                                    Text("#\(board.rank) of \(board.users_count)")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                            }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
+                            Spacer()
+                            HStack {
+                                VStack (alignment: .trailing) {
+                                    Text("\(board.rating,specifier: "%.1f")")
+                                    Text("\(board.wins)W / \(board.losses)L")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
                             }
-                        }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
-                        Spacer()
-                        HStack {
-                            VStack (alignment: .trailing) {
-                                Text("\(board.rating,specifier: "%.1f")")
-                                Text("\(board.wins)W / \(board.losses)L")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.gray)
-                            }
-                        }
-                    }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
-                    Divider()
+                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                        Divider()
+                    }
                 }
+                Spacer()
+                Spacer()
             }
-            Spacer()
-            Spacer()
-        }.navigationBarTitle(Text("My Boards"), displayMode: .inline)
+        }.navigationBarTitle(Text("Boards"), displayMode: .inline)
+    }
+    
+    func getIconColor(iconInt: Int) -> Color {
+        switch iconInt {
+        case 1:
+            return platinum
+        case 2:
+            return gold
+        case 3:
+            return silver
+        default:
+            return bronze
+        }
     }
 }
 
 struct ProfileActivity: View {
     
     var accessToken: String
-    @ObservedObject var fetchactivity: FetchActivity
+    @ObservedObject var fetchActivity: FetchProfileActivity
     
     init(accessToken: String) {
         self.accessToken = accessToken
-        self.fetchactivity = FetchActivity(accessToken: accessToken)
+        self.fetchActivity = FetchProfileActivity(accessToken: accessToken)
+        self.fetchActivity.fetchActivity(accessToken: self.accessToken)
     }
     
     var body: some View {
         VStack {
-            VStack (alignment: .leading) {
-                ForEach(fetchactivity.activities, id: \.self) { activity in
-                    HStack {
+            ScrollView {
+                VStack (alignment: .leading) {
+                    ForEach(fetchActivity.activities, id: \.self) { activity in
                         HStack {
-                            VStack (alignment: .leading) {
-                                Text(activity.board_name)
-                                Text("Played \(activity.opponent_name)")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.gray)
-                            }
-                        }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
-                        Spacer()
-                        HStack {
-                            VStack (alignment: .trailing) {
-                                Text(activity.result)
-                                if activity.rating_change > 0 {
-                                    Text("+\(activity.rating_change, specifier: "%.1f")")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(.gray)
-                                }else{
-                                    Text("\(activity.rating_change, specifier: "%.1f")")
+                            HStack {
+                                VStack (alignment: .leading) {
+                                    Text(activity.board_name)
+                                    Text("Played \(activity.opponent_name)")
                                         .font(.system(size: 15))
                                         .foregroundColor(.gray)
                                 }
-                                    
-                            }
-                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
-                    }.frame(height: 55)
-                    Divider()
+                            }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
+                            Spacer()
+                            HStack {
+                                VStack (alignment: .trailing) {
+                                    Text(activity.result)
+                                    if activity.rating_change > 0 {
+                                        Text("+\(activity.rating_change, specifier: "%.1f")")
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.gray)
+                                    }else{
+                                        Text("\(activity.rating_change, specifier: "%.1f")")
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.gray)
+                                    }
+                                        
+                                }
+                            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                        }.frame(height: 55)
+                        Divider()
+                    }
                 }
+                Spacer()
             }
-            Spacer()
         }.navigationBarTitle(Text("My Activity"), displayMode: .inline)
     }
 }
@@ -550,31 +606,33 @@ struct BoardActivity: View {
     
     var body: some View {
         VStack{
-            VStack (alignment: .leading) {
-                ForEach(fetchBoardsActivity.boardActivities, id: \.self) { activity in
-                    HStack {
+            ScrollView {
+                VStack (alignment: .leading) {
+                    ForEach(fetchBoardsActivity.boardActivities, id: \.self) { activity in
                         HStack {
-                            VStack (alignment: .leading) {
-                                Text(activity.submitter_name)
-                                Text(activity.submitter_result)
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.gray)
-                            }
-                        }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
-                        Spacer()
-                        HStack {
-                            VStack (alignment: .trailing) {
-                                Text(activity.receiver_name)
-                                Text(activity.receiver_result)
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.gray)
-                            }
-                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
-                    }.frame(height: 55)
-                    Divider()
+                            HStack {
+                                VStack (alignment: .leading) {
+                                    Text(activity.submitter_name)
+                                    Text(activity.submitter_result)
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                            }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
+                            Spacer()
+                            HStack {
+                                VStack (alignment: .trailing) {
+                                    Text(activity.receiver_name)
+                                    Text(activity.receiver_result)
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                        }.frame(height: 55)
+                        Divider()
+                    }
                 }
+                Spacer()
             }
-            Spacer()
         }.navigationBarTitle(Text("Board Activity"), displayMode: .inline)
     }
 }
@@ -636,34 +694,35 @@ struct BoardMembersView: View {
     
     var body: some View {
         VStack {
-            VStack (alignment: .leading) {
-                ForEach(fetchMembers.boardMembers, id: \.self) { member in
-                    HStack {
+            ScrollView {
+                VStack (alignment: .leading) {
+                    ForEach(fetchMembers.boardMembers, id: \.self) { member in
                         HStack {
-                            Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: member.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                            VStack (alignment: .leading) {
-                                Text(member.name)
-                                Text("#\(member.rank)")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.gray)
+                            HStack {
+                                Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: member.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                                VStack (alignment: .leading) {
+                                    Text(member.name)
+                                    Text("#\(member.rank)")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                            }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
+                            Spacer()
+                            HStack {
+                                VStack (alignment: .trailing) {
+                                    Text("\(member.rating, specifier: "%.1f")")
+                                    Text("\(member.wins)W / \(member.losses)L")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
                             }
-                        }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
-                        Spacer()
-                        HStack {
-                            VStack (alignment: .trailing) {
-                                Text("\(member.rating, specifier: "%.1f")")
-                                Text("\(member.wins)W / \(member.losses)L")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.gray)
-                            }
-                        }
-                    }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
-                    Divider()
+                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                        Divider()
+                    }
                 }
+                Spacer()
+                Spacer()
             }
-            Spacer()
-            Spacer()
-
         }.navigationBarTitle(Text("Board Members"), displayMode: .inline)
         .navigationBarItems(trailing: Button(action: {}) {
             VStack {
@@ -721,6 +780,8 @@ struct SubmitMatchView: View {
                     }
                 }.onTapGesture {
                     self.boardExpansion = !self.boardExpansion
+                    self.opponentExpansion = false
+                    self.resultExpansion = false
                 }; if self.boardExpansion {
                     VStack (alignment: .leading) {
                         ForEach(fetchBoards.boards, id: \.self) { board in
@@ -763,6 +824,8 @@ struct SubmitMatchView: View {
                     }
                 }.onTapGesture {
                     self.opponentExpansion = !self.opponentExpansion
+                    self.boardExpansion = false
+                    self.resultExpansion = false
                 }; if (self.opponentExpansion && self.selectedBoard.board_name != "") {
                     VStack (alignment: .leading) {
                         ForEach(self.fetchBoardMembers.boardMembers, id: \.self) { opponent in
@@ -802,6 +865,8 @@ struct SubmitMatchView: View {
                     }
                 }.onTapGesture {
                     self.resultExpansion = !self.resultExpansion
+                    self.boardExpansion = false
+                    self.opponentExpansion = false
                 }; if (self.resultExpansion && self.selectedOpponent.name != "") {
                         VStack (alignment: .center) {
                             HStack {
@@ -843,7 +908,9 @@ struct SubmitMatchView: View {
                     }
                 }.navigationBarTitle(Text("Submit Match"), displayMode: .inline)
             }
-            .listStyle(GroupedListStyle())
+        .listStyle(GroupedListStyle()).onAppear{
+            self.fetchBoards.fetchBoards(accessToken: self.accessToken)
+        }
     }
     
     func submitMatch() {

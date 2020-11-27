@@ -122,6 +122,7 @@ struct RegView: View {
     @State private var showingConfirmation = false
     @State private var confirmPword: String = ""
     @State var reg_emailInUse = ""
+    @EnvironmentObject var userData: UserData
     
     var body: some View {
         NavigationView {
@@ -210,11 +211,15 @@ struct RegView: View {
             }
             
             if let registrationToken = try? JSONDecoder().decode(RegistrationToken.self, from: data) {
-                self.confirmationMessage =
-                    "User Created?: \(registrationToken.success)\n" +
-                    "User Created Message: \(registrationToken.message)\n" +
-                    "User Access Token (JWT): \(registrationToken.access_token)"
-                self.showingConfirmation = true
+                if registrationToken.success {
+                    self.userData.loggedIn = true
+                    self.userData.access_token = registrationToken.access_token
+                }
+//                self.confirmationMessage =
+//                    "User Created?: \(registrationToken.success)\n" +
+//                    "User Created Message: \(registrationToken.message)\n" +
+//                    "User Access Token (JWT): \(registrationToken.access_token)"
+//                self.showingConfirmation = true
             } else {
                 print("Invalid response from server")
             }

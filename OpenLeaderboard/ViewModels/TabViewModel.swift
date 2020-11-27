@@ -52,6 +52,12 @@ class FetchBoards: ObservableObject {
     var accessToken: String
     
     init(accessToken: String) {
+        self.boards = []
+        self.myBoards = []
+        self.accessToken = accessToken
+    }
+    
+    public func fetchBoards(accessToken: String) {
         self.accessToken = accessToken
         let url = URL(string: (apiURL + "/user/boards"))!
         let myUrl = URL(string: (apiURL + "/user/boards/mine"))!
@@ -111,6 +117,11 @@ class FetchProfile: ObservableObject {
     var accessToken: String
 
     init(accessToken: String) {
+        favourite_boards = []
+        self.accessToken = accessToken
+    }
+    
+    public func fetchProfile(accessToken: String) {
         self.accessToken = accessToken
         let url = URL(string: (apiURL + "/user/profile"))!
         var request = URLRequest(url: url)
@@ -130,7 +141,6 @@ class FetchProfile: ObservableObject {
                     self.board_count = decodedData.board_count
                     self.matches_count = decodedData.matches_count
                     self.favourite_boards = decodedData.favourite_boards
-
                 }
                 } else {
                     print("No profile data was returned!")
@@ -142,13 +152,18 @@ class FetchProfile: ObservableObject {
     }
 }
 
-class FetchActivity: ObservableObject {
+class FetchProfileActivity: ObservableObject {
 
     @Published var activities = [Activity]()
     
     var accessToken: String
 
     init(accessToken: String) {
+        self.accessToken = accessToken
+        self.activities = []
+    }
+    
+    public func fetchActivity(accessToken: String) {
         self.accessToken = accessToken
         let url = URL(string: (apiURL + "/user/activity"))!
         var request = URLRequest(url: url)
