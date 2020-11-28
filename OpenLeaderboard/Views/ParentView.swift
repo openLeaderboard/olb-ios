@@ -177,30 +177,22 @@ struct MainBoardsView: View {
                                 }
                                 Divider()
                             }
-                            NavigationLink(destination: AddBoardView(accessToken: self.accessToken)) {
                             VStack {
                                 Spacer()
-                                    HStack {
-                                    Spacer()
-                                        Button(action: {
-                                            self.navigateTo = "create"
-                                        }, label: {
-                                            Text("+")
-                                            .font(.system(.largeTitle))
-                                            .frame(width: 55, height: 48)
-                                            .foregroundColor(Color.white)
-                                            .padding(.bottom, 7)
-                                        })
-                                        .background(bgColor)
-                                        .cornerRadius(38.5)
-                                        .padding()
-                                        .shadow(color: Color.black.opacity(0.3),
-                                                radius: 3,
-                                                x: 3,
-                                                y: 3)
-                                    }
-                                }
-                            }.navigationBarTitle(Text("All Boards"), displayMode: .inline)
+                                NavigationLink(destination: AddBoardView(accessToken: self.accessToken)) {}
+                                    .navigationBarTitle(Text("My Boards"), displayMode: .inline)
+                                    .navigationBarItems(trailing: Button(action: {}) {
+                                        VStack {
+                                            
+                                            Spacer()
+                                            NavigationLink(destination: AddBoardView(accessToken: self.accessToken)) {
+                                                Image(systemName: "note.text.badge.plus")
+                                                        .resizable()
+                                                        .frame(width: 32.0, height: 32.0)
+                                            }
+                                        }
+                                    })
+                            }
                         }
                     }
                     else {
@@ -236,33 +228,26 @@ struct MainBoardsView: View {
                             }
                             VStack {
                                 Spacer()
-                                NavigationLink(destination: AddBoardView(accessToken: self.accessToken)) {
-                                    HStack {
-                                    Spacer()
-                                        Button(action: {
-                                            self.navigateTo = "create"
-                                        }, label: {
-                                            Text("+")
-                                            .font(.system(.largeTitle))
-                                            .frame(width: 55, height: 48)
-                                            .foregroundColor(Color.white)
-                                            .padding(.bottom, 7)
-                                        })
-                                        .background(bgColor)
-                                        .cornerRadius(38.5)
-                                        .padding()
-                                        .shadow(color: Color.black.opacity(0.3),
-                                                radius: 3,
-                                                x: 3,
-                                                y: 3)
-                                    }
-                                }
+                                NavigationLink(destination: AddBoardView(accessToken: self.accessToken)) {}
+                                    .navigationBarTitle(Text("My Boards"), displayMode: .inline)
+                                    .navigationBarItems(trailing: Button(action: {}) {
+                                        VStack {
+                                            
+                                            Spacer()
+                                            NavigationLink(destination: AddBoardView(accessToken: self.accessToken)) {
+                                                Image(systemName: "note.text.badge.plus")
+                                                        .resizable()
+                                                        .frame(width: 32.0, height: 32.0)
+                                            }
+                                        }
+                                    })
                             }
                         }
                     }
                 }
             }
         }
+        
     }
     
     func getIconColor(iconInt: Int) -> Color {
