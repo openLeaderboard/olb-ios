@@ -263,3 +263,59 @@ class FetchBoardMembers: ObservableObject {
     }
 }
 
+
+class FetchBoardDetails: ObservableObject {
+
+    @Published var board_id: Int = 0
+    @Published var board_name: String = ""
+    @Published var is_public: Bool = false
+    @Published var is_admin: Bool = false
+    @Published var is_member: Bool = false
+    @Published var matches_count: Int = 0
+    @Published var member_count: Int = 0
+    @Published var top_members = [BoardMembersModel]()
+
+    var accessToken: String
+    var boardId: Int
+
+    init(accessToken: String, boardId: Int) {
+        top_members = []
+        self.accessToken = accessToken
+        self.boardId = boardId
+    }
+    
+    public func fetchBoardDetails(accessToken: String, boardId: Int) {
+        self.accessToken = accessToken
+        self.boardId = boardId
+        let url = URL(string: (apiURL + "/board/\(self.boardId)"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let boardDetailsData = data {
+                    let decodedData = try JSONDecoder().decode(BoardDetailsModel.self, from: boardDetailsData)
+                    
+                    DispatchQueue.main.async {
+                        self.board_id = decodedData.board_id
+                        self.board_name = decodedData.board_name
+                        self.is_public = decodedData.is_public
+                        self.is_admin = decodedData.is_admin
+                        self.is_member = decodedData.is_member
+                        self.matches_count = decodedData.matches_count
+                        self.member_count = decodedData.member_count
+                        self.top_members  = decodedData.top_members
+                    }
+                } else {
+                    print("No board details data was returned!")
+                }
+            } catch {
+                print("There was an error getting board details data!")
+            }
+        }.resume()
+    }
+}
+
