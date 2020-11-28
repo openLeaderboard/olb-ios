@@ -142,6 +142,7 @@ struct MainBoardsView: View {
     var accessToken: String
     @State private var menuIndex: Int = 0
     @State private var navigateTo: String? = nil
+    @State var enableCreateBoard = false
     @ObservedObject var fetchBoards: FetchBoards
     
     init(accessToken: String) {
@@ -189,30 +190,18 @@ struct MainBoardsView: View {
                                     }
                                     Divider()
                                 }
-                                NavigationLink(destination: AddBoardView(accessToken: self.accessToken)) {
-                                VStack {
-                                    Spacer()
-                                        HStack {
-                                        Spacer()
-                                            Button(action: {
-                                                self.navigateTo = "create"
-                                            }, label: {
-                                                Text("+")
-                                                .font(.system(.largeTitle))
-                                                .frame(width: 55, height: 48)
-                                                .foregroundColor(Color.white)
-                                                .padding(.bottom, 7)
-                                            })
-                                            .background(bgColor)
-                                            .cornerRadius(38.5)
-                                            .padding()
-                                            .shadow(color: Color.black.opacity(0.3),
-                                                    radius: 3,
-                                                    x: 3,
-                                                    y: 3)
+                                NavigationLink(destination: AddBoardView(accessToken: self.accessToken), isActive: self.$enableCreateBoard) {
+                                    EmptyView()
+                                }
+                                    .navigationBarTitle(Text("Boards"), displayMode: .inline)
+                                .navigationBarItems(trailing: Button(action: {self.enableCreateBoard = true}) {
+                                        VStack {
+                                            Spacer()
+                                            Image(systemName: "note.text.badge.plus")
+                                                    .resizable()
+                                                    .frame(width: 30.0, height: 27.0)
                                         }
-                                    }
-                                }.navigationBarTitle(Text("Boards"), displayMode: .inline)
+                                    })
                             }
                         }
                     }
@@ -250,27 +239,18 @@ struct MainBoardsView: View {
                                 }
                                 VStack {
                                     Spacer()
-                                    NavigationLink(destination: AddBoardView(accessToken: self.accessToken)) {
-                                        HStack {
-                                        Spacer()
-                                            Button(action: {
-                                                self.navigateTo = "create"
-                                            }, label: {
-                                                Text("+")
-                                                .font(.system(.largeTitle))
-                                                .frame(width: 55, height: 48)
-                                                .foregroundColor(Color.white)
-                                                .padding(.bottom, 7)
-                                            })
-                                            .background(bgColor)
-                                            .cornerRadius(38.5)
-                                            .padding()
-                                            .shadow(color: Color.black.opacity(0.3),
-                                                    radius: 3,
-                                                    x: 3,
-                                                    y: 3)
-                                        }
+                                    NavigationLink(destination: AddBoardView(accessToken: self.accessToken), isActive: self.$enableCreateBoard) {
+                                        EmptyView()
                                     }
+                                        .navigationBarTitle(Text("Boards"), displayMode: .inline)
+                                    .navigationBarItems(trailing: Button(action: {self.enableCreateBoard = true}) {
+                                            VStack {
+                                                Spacer()
+                                                Image(systemName: "note.text.badge.plus")
+                                                        .resizable()
+                                                        .frame(width: 30.0, height: 27.0)
+                                            }
+                                        })
                                 }
                             }
                         }
@@ -278,6 +258,7 @@ struct MainBoardsView: View {
                 }
             }.onAppear {
                 self.fetchBoards.fetchBoards(accessToken: self.accessToken)
+                self.enableCreateBoard = false
             }
         }
         
@@ -1029,9 +1010,6 @@ struct AddMemberView: View {
                                 }
                             }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
                             Spacer()
-    //                        if(user.id == my user id){
-    //                            then dont display a plus button beside name
-    //                        }
                             HStack {
                                 Button(action: {
                                     showingConfirmation = true
