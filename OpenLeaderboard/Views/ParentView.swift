@@ -62,6 +62,17 @@ struct Activity: Codable, Hashable {
     public var result = ""
 }
 
+struct BoardDetailsModel: Codable {
+    public var board_id: Int = 0
+    public var board_name: String = ""
+    public var is_public: Bool = false
+    public var is_admin: Bool = false
+    public var is_member: Bool = false
+    public var matches_count: Int = 0
+    public var member_count: Int = 0
+    public var top_members = [BoardMembersModel]()
+}
+
 struct BoardActivities: Codable {
     let matches: [BoardActivityModel]
 }
@@ -151,7 +162,7 @@ struct MainBoardsView: View {
                             VStack (alignment: .leading) {
                                 ForEach(fetchBoards.boards, id: \.self) { board in
                                     HStack {
-                                        NavigationLink(destination: BoardDetails(accessToken: self.accessToken, currentBoard: board)) {
+                                        NavigationLink(destination: BoardDetails(accessToken: self.accessToken, boardId: board.board_id)) {
                                             HStack {
                                                 Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
                                                 VStack (alignment: .leading) {
@@ -210,7 +221,7 @@ struct MainBoardsView: View {
                             VStack (alignment: .leading) {
                                 ForEach(fetchBoards.myBoards, id: \.self) { board in
                                     HStack {
-                                        NavigationLink(destination: BoardDetails(accessToken: self.accessToken, currentBoard: board)) {
+                                        NavigationLink(destination: BoardDetails(accessToken: self.accessToken, boardId: board.board_id)) {
                                             HStack {
                                                 Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
                                                 VStack (alignment: .leading) {
@@ -640,41 +651,83 @@ struct BoardActivity: View {
 struct BoardDetails: View {
     
     var accessToken: String
-    var board: Boards
+    var boardId: Int
+    @ObservedObject var fetchBoardDetails: FetchBoardDetails
     
-    init(accessToken: String, currentBoard: Boards) {
+    init(accessToken: String, boardId: Int) {
         self.accessToken = accessToken
-        self.board = currentBoard
+        self.boardId = boardId
+        self.fetchBoardDetails = FetchBoardDetails(accessToken: accessToken, boardId: boardId)
     }
     
     var body: some View {
         VStack {
-            Text("Top Players")
-                .font(.system(size: 23))
-                .padding(EdgeInsets(top: 30, leading: 20, bottom: 0, trailing: 20))
-                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+            Text("Top Players").font(.system(size: 23)).padding(.top, 30)
+            VStack (alignment: .leading) {
+                ForEach(fetchBoardDetails.top_members, id: \.self) { member in
+                    HStack {
+                        HStack {
+                            Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: member.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                            VStack (alignment: .leading) {
+                                Text(member.name)
+                                Text("#\(member.rank)")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.gray)
+                            }
+                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                        Spacer()
+                        HStack {
+                            VStack (alignment: .trailing) {
+                                Text(String(format: "%.1f", member.rating))
+                                Text("\(member.wins)W / \(member.losses)L")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.gray)
+                            }
+                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                    }
+                    Divider()
+                }
+            }.padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
             Spacer()
+            
             VStack {
                 Divider()
-                NavigationLink(destination: BoardMembersView(accessToken: accessToken, boardId: self.board.board_id)) {
+                NavigationLink(destination: BoardMembersView(accessToken: accessToken, boardId: self.boardId)) {
                     HStack {
                         Text("Members").foregroundColor(Color(UIColor.label))
                         Spacer()
-                        Text("\(board.users_count)").foregroundColor(Color(UIColor.label))
+                        Text("\(fetchBoardDetails.member_count)").foregroundColor(Color(UIColor.label))
                         Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                     }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
                 }
                 Divider()
-                NavigationLink(destination: BoardActivity(accessToken: accessToken, boardId: self.board.board_id)) {
+                NavigationLink(destination: BoardActivity(accessToken: accessToken, boardId: self.boardId)) {
                     HStack {
                         Text("Activity").foregroundColor(Color(UIColor.label))
                         Spacer()
+                        Text("\(fetchBoardDetails.matches_count)").foregroundColor(Color(UIColor.label))
                         Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                     }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
                 }
                 Divider()
             }
-        }.navigationBarTitle(Text("\(board.board_name)"), displayMode: .inline)
+        }.navigationBarTitle(Text("\(fetchBoardDetails.board_name)"), displayMode: .inline).onAppear{
+            fetchBoardDetails.fetchBoardDetails(accessToken: self.accessToken, boardId: self.boardId)
+        }
+    }
+    
+    func getIconColor(iconInt: Int) -> Color {
+        switch iconInt {
+        case 1:
+            return platinum
+        case 2:
+            return gold
+        case 3:
+            return silver
+        default:
+            return bronze
+        }
     }
 }
 
