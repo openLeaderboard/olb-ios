@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2C17B2422548800000E32111 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C17B2412548800000E32111 /* AuthViewModel.swift */; };
+		2C5FD07E25717F8B001104E8 /* AddMemberViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5FD07D25717F8B001104E8 /* AddMemberViewModel.swift */; };
 		2C7B158C253B596E00D09EF0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B158B253B596E00D09EF0 /* AppDelegate.swift */; };
 		2C7B158E253B596E00D09EF0 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B158D253B596E00D09EF0 /* SceneDelegate.swift */; };
 		2C7B1590253B596E00D09EF0 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B158F253B596E00D09EF0 /* AuthView.swift */; };
@@ -42,6 +43,7 @@
 
 /* Begin PBXFileReference section */
 		2C17B2412548800000E32111 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		2C5FD07D25717F8B001104E8 /* AddMemberViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMemberViewModel.swift; sourceTree = "<group>"; };
 		2C7B1588253B596E00D09EF0 /* OpenLeaderboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenLeaderboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C7B158B253B596E00D09EF0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2C7B158D253B596E00D09EF0 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -166,6 +168,7 @@
 				2C17B2412548800000E32111 /* AuthViewModel.swift */,
 				F7894D61254BA603003D2462 /* TabViewModel.swift */,
 				F75964D1254E224800E2D9D8 /* AddBoardViewModel.swift */,
+				2C5FD07D25717F8B001104E8 /* AddMemberViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -309,6 +312,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C5FD07E25717F8B001104E8 /* AddMemberViewModel.swift in Sources */,
 				2C17B2422548800000E32111 /* AuthViewModel.swift in Sources */,
 				F75964D2254E224E00E2D9D8 /* AddBoardViewModel.swift in Sources */,
 				F7894D50254B97F7003D2462 /* LoginViewModel.swift in Sources */,
