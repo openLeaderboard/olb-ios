@@ -9,6 +9,52 @@
 import Foundation
 import UIKit
 
+
+class FetchUsersToAdd: ObservableObject {
+    
+    @Published var userResults = [Users]()
+    
+    var accessToken: String
+    var boardID: Int
+    
+    init(accessToken: String, boardID: Int) {
+        self.accessToken = accessToken
+        self.boardID = boardID
+    }
+    
+    public func fetchUsersToAdd() {
+        let url = URL(string: (apiURL + "/user/search/notinboard/\(self.boardID)"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let usersData = data {
+                    let decodedData = try JSONDecoder().decode(AllUsers.self, from: usersData)
+                    let decodedUsers = decodedData.search_result
+                DispatchQueue.main.async {
+                    self.userResults = decodedUsers
+                    print(self.userResults)
+                }
+                } else {
+                    print("No users data was returned!")
+                }
+            } catch {
+                print("There was an error getting users data: \(error)")
+            }
+        }.resume()
+    }
+    
+    public func removeUser(user: Users) {
+        guard let index = userResults.firstIndex(of: user) else {return}
+        userResults.remove(at: index)
+    }
+}
+
+
 class FetchUsers: ObservableObject {
     
     @Published var userResults = [Users]()

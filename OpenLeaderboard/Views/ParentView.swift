@@ -280,6 +280,7 @@ struct MainBoardsView: View {
                 self.fetchBoards.fetchBoards(accessToken: self.accessToken)
             }
         }
+        
     }
     
     func getIconColor(iconInt: Int) -> Color {
@@ -734,6 +735,7 @@ struct BoardDetails: View {
 struct BoardMembersView: View {
     
     @State var selectedTag: String?
+    @State var enableAddMember = false
     
     var accessToken: String
     var boardId: Int
@@ -775,17 +777,17 @@ struct BoardMembersView: View {
                 }
                 Spacer()
                 Spacer()
+                NavigationLink(destination: AddMemberView(accessToken: accessToken, boardID: self.boardId), isActive: self.$enableAddMember) {
+                    EmptyView()
+                }
             }
         }.navigationBarTitle(Text("Board Members"), displayMode: .inline)
-        .navigationBarItems(trailing: Button(action: {}) {
+        .navigationBarItems(trailing: Button(action: {self.enableAddMember = true}) {
             VStack {
-                
                 Spacer()
-                NavigationLink(destination: AddMemberView(accessToken: accessToken)) {
-                    Image(systemName: "person.fill.badge.plus")
-                            .resizable()
-                            .frame(width: 32.0, height: 32.0)
-                }
+                Image(systemName: "person.fill.badge.plus")
+                        .resizable()
+                        .frame(width: 32.0, height: 32.0)
             }
         })
     }
@@ -988,62 +990,126 @@ struct SubmitMatchView: View {
 struct AddMemberView: View {
    
     
-    var accessToken: String
-    @ObservedObject var fetchUsers: FetchUsers
+    @State private var confirmationMessage = ""
+    @State private var showingConfirmation = false
+    @State var userToAdd = Users()
     
-    init(accessToken: String) {
+    var boardID: Int
+    var accessToken: String
+    @ObservedObject var fetchUsersToAdd: FetchUsersToAdd
+    @ObservedObject var addMemberViewModel = AddMemberViewModel()
+    
+    init(accessToken: String, boardID: Int) {
         self.accessToken = accessToken
-        self.fetchUsers = FetchUsers(accessToken: accessToken)
+        self.boardID = boardID
+        self.fetchUsersToAdd = FetchUsersToAdd(accessToken: accessToken, boardID: boardID)
     }
     
         
     var body: some View {
         VStack{
-            VStack (alignment: .leading) {
-                ForEach(fetchUsers.userResults, id: \.self) { user in
-                    HStack {
+            ScrollView {
+                VStack (alignment: .leading) {
+                    ForEach(fetchUsersToAdd.userResults, id: \.self) { user in
                         HStack {
-                            VStack (alignment: .leading) {
-                                Text("\(user.name)")
-                                if(user.board_count == 1){
-                                    Text("\(user.board_count) Board")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(.gray)
-                                }else {
-                                    Text("\(user.board_count) Boards")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(.gray)
-                                }
-                                
+                            HStack {
+                                VStack (alignment: .leading) {
+                                    Text("\(user.name)")
+                                    if(user.board_count == 1){
+                                        Text("\(user.board_count) Board")
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.gray)
+                                    }else {
+                                        Text("\(user.board_count) Boards")
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.gray)
+                                    }
                                     
+                                        
+                                }
+                            }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
+                            Spacer()
+    //                        if(user.id == my user id){
+    //                            then dont display a plus button beside name
+    //                        }
+                            HStack {
+                                Button(action: {
+                                    showingConfirmation = true
+                                    userToAdd = user
+                                }, label: {
+                                    Text("+")
+                                    .font(.system(.largeTitle))
+                                        .frame(width: 32, height: 24.5)
+                                    .foregroundColor(Color.white)
+                                    .padding(.bottom, 7)
+                                })
+                                .background(bgColor)
+                                .cornerRadius(38.5)
+                                .padding()
+                                .shadow(color: Color.black.opacity(0.3),
+                                        radius: 3,
+                                        x: 3,
+                                        y: 3)
                             }
-                        }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
-                        Spacer()
-                        HStack {
-                            Button(action: {
-                                //self.navigateTo = "create"
-                            }, label: {
-                                Text("+")
-                                .font(.system(.largeTitle))
-                                    .frame(width: 32, height: 24.5)
-                                .foregroundColor(Color.white)
-                                .padding(.bottom, 7)
-                            })
-                            .background(bgColor)
-                            .cornerRadius(38.5)
-                            .padding()
-                            .shadow(color: Color.black.opacity(0.3),
-                                    radius: 3,
-                                    x: 3,
-                                    y: 3)
-                        }
-                    }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
-                    Divider()
+                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                        Divider()
+                            .alert(isPresented:$showingConfirmation) {
+                                Alert(title: Text("Invite \(userToAdd.name) to board?"), message: Text(""), primaryButton: .default(Text("Invite")) {
+                                            inviteMember(user: userToAdd)
+                                            fetchUsersToAdd.removeUser(user: userToAdd)
+                                        }, secondaryButton: .cancel())
+                                    }
+                    }
                 }
             }
             Spacer()
             Spacer()
-        }.navigationBarTitle(Text("Add Member"), displayMode: .inline)
+        }.navigationBarTitle(Text("Add Member"), displayMode: .inline).onAppear{
+            self.fetchUsersToAdd.fetchUsersToAdd()
+        }.onDisappear{
+            confirmationMessage = ""
+            showingConfirmation = false
+        }
+       
+    }
+    
+    func inviteMember(user: Users) {
+        self.addMemberViewModel.user_id = user.id
+        self.addMemberViewModel.board_id = boardID
+        
+        struct RegistrationToken: Decodable {
+            let success: Bool
+            let message: String
+        }
+        
+        guard let encoded = try? JSONEncoder().encode(addMemberViewModel)
+        else {
+            print("Failed to encode creation of member request")
+            return
+        }
+        
+        let url = URL(string: (apiURL + "/board/invite"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "POST"
+        request.httpBody = encoded
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            guard let data = data else {
+                print("No data in response: \(error?.localizedDescription ?? "Unknown error").")
+                return
+            }
+            
+            if let createMemberResponse = try? JSONDecoder().decode(RegistrationToken.self, from: data) {
+                print("Member added successfully!")
+            } else {
+                print("Invalid response from server")
+            }
+        }.resume()
+        
+        
     }
 }
 
