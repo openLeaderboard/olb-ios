@@ -645,7 +645,9 @@ struct BoardActivity: View {
                 }
                 Spacer()
             }
-        }.navigationBarTitle(Text("Board Activity"), displayMode: .inline)
+        }.navigationBarTitle(Text("Board Activity"), displayMode: .inline).onAppear{
+            self.fetchBoardsActivity.fetchBoardsActivity()
+        }
     }
 }
 
@@ -694,7 +696,7 @@ struct BoardDetails: View {
             
             VStack {
                 Divider()
-                NavigationLink(destination: BoardMembersView(accessToken: accessToken, boardId: self.boardId)) {
+                NavigationLink(destination: BoardMembersView(accessToken: accessToken, boardId: self.boardId, is_admin: fetchBoardDetails.is_admin)) {
                     HStack {
                         Text("Members").foregroundColor(Color(UIColor.label))
                         Spacer()
@@ -716,6 +718,30 @@ struct BoardDetails: View {
         }.navigationBarTitle(Text("\(fetchBoardDetails.board_name)"), displayMode: .inline).onAppear{
             fetchBoardDetails.fetchBoardDetails(accessToken: self.accessToken, boardId: self.boardId)
         }
+        .navigationBarItems(trailing: Button(action: {
+            if !fetchBoardDetails.is_member && fetchBoardDetails.is_public {
+                print("join")
+                // synchronous join then reload
+            }
+            else if fetchBoardDetails.is_member && !fetchBoardDetails.is_admin {
+                print("leave")
+                // synchronous leave then reload
+            }
+        }) {
+            VStack {
+                Spacer()
+                if !fetchBoardDetails.is_member && fetchBoardDetails.is_public {
+                    Image(systemName: "plus.square.fill")
+                            .resizable()
+                            .frame(width: 32.0, height: 32.0)
+                }
+                else if fetchBoardDetails.is_member && !fetchBoardDetails.is_admin {
+                    Image(systemName: "minus.square.fill")
+                            .resizable()
+                            .frame(width: 32.0, height: 32.0)
+                }
+            }
+        })
     }
     
     func getIconColor(iconInt: Int) -> Color {
@@ -739,12 +765,14 @@ struct BoardMembersView: View {
     
     var accessToken: String
     var boardId: Int
+    var is_admin = false
     @ObservedObject var fetchMembers: FetchBoardMembers
     
-    init(accessToken: String, boardId: Int) {
+    init(accessToken: String, boardId: Int, is_admin: Bool) {
         self.accessToken = accessToken
         self.boardId = boardId
         self.fetchMembers = FetchBoardMembers(accessToken: accessToken,  boardID: self.boardId)
+        self.is_admin = is_admin
     }
     
     var body: some View {
@@ -782,12 +810,17 @@ struct BoardMembersView: View {
                 }
             }
         }.navigationBarTitle(Text("Board Members"), displayMode: .inline)
+        .onAppear {
+            self.fetchMembers.fetchBoardMembers()
+        }
         .navigationBarItems(trailing: Button(action: {self.enableAddMember = true}) {
-            VStack {
-                Spacer()
-                Image(systemName: "person.fill.badge.plus")
-                        .resizable()
-                        .frame(width: 32.0, height: 32.0)
+            if self.is_admin {
+                VStack {
+                    Spacer()
+                    Image(systemName: "person.fill.badge.plus")
+                            .resizable()
+                            .frame(width: 32.0, height: 32.0)
+                }
             }
         })
     }

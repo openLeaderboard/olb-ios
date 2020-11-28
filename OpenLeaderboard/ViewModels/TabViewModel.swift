@@ -247,6 +247,9 @@ class FetchBoardsActivity: ObservableObject {
     init(accessToken: String, boardID: Int) {
         self.accessToken = accessToken
         self.boardID = boardID
+    }
+    
+    public func fetchBoardsActivity() {
         let url = URL(string: (apiURL + "/board/\(self.boardID)/activity"))!
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -283,6 +286,9 @@ class FetchBoardMembers: ObservableObject {
     init(accessToken: String, boardID: Int) {
         self.accessToken = accessToken
         self.boardID = boardID
+    }
+    
+    public func fetchBoardMembers() {
         let url = URL(string: (apiURL + "/board/\(self.boardID)/members"))!
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
