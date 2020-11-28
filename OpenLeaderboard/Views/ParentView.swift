@@ -735,6 +735,7 @@ struct BoardDetails: View {
 struct BoardMembersView: View {
     
     @State var selectedTag: String?
+    @State var enableAddMember = false
     
     var accessToken: String
     var boardId: Int
@@ -776,17 +777,17 @@ struct BoardMembersView: View {
                 }
                 Spacer()
                 Spacer()
+                NavigationLink(destination: AddMemberView(accessToken: accessToken, boardID: self.boardId), isActive: self.$enableAddMember) {
+                    EmptyView()
+                }
             }
         }.navigationBarTitle(Text("Board Members"), displayMode: .inline)
-        .navigationBarItems(trailing: Button(action: {}) {
+        .navigationBarItems(trailing: Button(action: {self.enableAddMember = true}) {
             VStack {
-                
                 Spacer()
-                NavigationLink(destination: AddMemberView(accessToken: accessToken, boardID: self.boardId)) {
-                    Image(systemName: "person.fill.badge.plus")
-                            .resizable()
-                            .frame(width: 32.0, height: 32.0)
-                }
+                Image(systemName: "person.fill.badge.plus")
+                        .resizable()
+                        .frame(width: 32.0, height: 32.0)
             }
         })
     }
@@ -1007,60 +1008,68 @@ struct AddMemberView: View {
         
     var body: some View {
         VStack{
-            VStack (alignment: .leading) {
-                ForEach(fetchUsersToAdd.userResults, id: \.self) { user in
-                    HStack {
+            ScrollView {
+                VStack (alignment: .leading) {
+                    ForEach(fetchUsersToAdd.userResults, id: \.self) { user in
                         HStack {
-                            VStack (alignment: .leading) {
-                                Text("\(user.name)")
-                                if(user.board_count == 1){
-                                    Text("\(user.board_count) Board")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(.gray)
-                                }else {
-                                    Text("\(user.board_count) Boards")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(.gray)
-                                }
-                                
+                            HStack {
+                                VStack (alignment: .leading) {
+                                    Text("\(user.name)")
+                                    if(user.board_count == 1){
+                                        Text("\(user.board_count) Board")
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.gray)
+                                    }else {
+                                        Text("\(user.board_count) Boards")
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.gray)
+                                    }
                                     
-                            }
-                        }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
-                        Spacer()
-//                        if(user.id == my user id){
-//                            then dont display a plus button beside name
-//                        }
-                        HStack {
-                            Button(action: {
-                                showingConfirmation = true
-                                userToAdd = user
-                            }, label: {
-                                Text("+")
-                                .font(.system(.largeTitle))
-                                    .frame(width: 32, height: 24.5)
-                                .foregroundColor(Color.white)
-                                .padding(.bottom, 7)
-                            })
-                            .background(bgColor)
-                            .cornerRadius(38.5)
-                            .padding()
-                            .shadow(color: Color.black.opacity(0.3),
-                                    radius: 3,
-                                    x: 3,
-                                    y: 3)
-                        }
-                    }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
-                    Divider()
-                        .alert(isPresented:$showingConfirmation) {
-                            Alert(title: Text("Invite \(userToAdd.name) to board?"), message: Text(""), primaryButton: .default(Text("Invite")) {
-                                        inviteMember(user: userToAdd)
-                                    }, secondaryButton: .cancel())
+                                        
                                 }
+                            }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
+                            Spacer()
+    //                        if(user.id == my user id){
+    //                            then dont display a plus button beside name
+    //                        }
+                            HStack {
+                                Button(action: {
+                                    showingConfirmation = true
+                                    userToAdd = user
+                                }, label: {
+                                    Text("+")
+                                    .font(.system(.largeTitle))
+                                        .frame(width: 32, height: 24.5)
+                                    .foregroundColor(Color.white)
+                                    .padding(.bottom, 7)
+                                })
+                                .background(bgColor)
+                                .cornerRadius(38.5)
+                                .padding()
+                                .shadow(color: Color.black.opacity(0.3),
+                                        radius: 3,
+                                        x: 3,
+                                        y: 3)
+                            }
+                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                        Divider()
+                            .alert(isPresented:$showingConfirmation) {
+                                Alert(title: Text("Invite \(userToAdd.name) to board?"), message: Text(""), primaryButton: .default(Text("Invite")) {
+                                            inviteMember(user: userToAdd)
+                                            fetchUsersToAdd.removeUser(user: userToAdd)
+                                        }, secondaryButton: .cancel())
+                                    }
+                    }
                 }
             }
             Spacer()
             Spacer()
-        }.navigationBarTitle(Text("Add Member"), displayMode: .inline)
+        }.navigationBarTitle(Text("Add Member"), displayMode: .inline).onAppear{
+            self.fetchUsersToAdd.fetchUsersToAdd()
+        }.onDisappear{
+            confirmationMessage = ""
+            showingConfirmation = false
+        }
        
     }
     

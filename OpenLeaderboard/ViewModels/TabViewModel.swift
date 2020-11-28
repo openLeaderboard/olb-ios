@@ -20,6 +20,9 @@ class FetchUsersToAdd: ObservableObject {
     init(accessToken: String, boardID: Int) {
         self.accessToken = accessToken
         self.boardID = boardID
+    }
+    
+    public func fetchUsersToAdd() {
         let url = URL(string: (apiURL + "/user/search/notinboard/\(self.boardID)"))!
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -43,6 +46,11 @@ class FetchUsersToAdd: ObservableObject {
                 print("There was an error getting users data: \(error)")
             }
         }.resume()
+    }
+    
+    public func removeUser(user: Users) {
+        guard let index = userResults.firstIndex(of: user) else {return}
+        userResults.remove(at: index)
     }
 }
 
