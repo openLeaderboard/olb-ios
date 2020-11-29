@@ -63,6 +63,10 @@ class FetchUsers: ObservableObject {
     
     init(accessToken: String) {
         self.accessToken = accessToken
+    }
+    
+    public func fetchUsers(accessToken: String) {
+        self.accessToken = accessToken
         let url = URL(string: (apiURL + "/user/search"))!
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -75,10 +79,9 @@ class FetchUsers: ObservableObject {
                 if let usersData = data {
                     let decodedData = try JSONDecoder().decode(AllUsers.self, from: usersData)
                     let decodedUsers = decodedData.search_result
-                DispatchQueue.main.async {
-                    self.userResults = decodedUsers
-                    print(self.userResults)
-                }
+                    DispatchQueue.main.async {
+                        self.userResults = decodedUsers
+                    }
                 } else {
                     print("No users data was returned!")
                 }
@@ -152,6 +155,89 @@ class FetchBoards: ObservableObject {
     }
 }
 
+
+class FetchSpecificProfileBoards: ObservableObject {
+    
+    @Published var boards = [Boards]()
+    
+    var accessToken: String
+    var userID: Int
+    
+    init(accessToken: String, userID: Int) {
+        self.boards = []
+        self.userID = userID
+        self.accessToken = accessToken
+    }
+    
+    public func fetchSpecificProfileBoards(accessToken: String, userID: Int) {
+        self.accessToken = accessToken
+        self.userID = userID
+        let url = URL(string: (apiURL + "/user/\(userID)/boards"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let boardsData = data {
+                    let decodedData = try JSONDecoder().decode(Initial.self, from: boardsData)
+                    let decodedBoards = decodedData.boards
+                DispatchQueue.main.async {
+                    self.boards = decodedBoards
+                }
+                } else {
+                    print("No boards data was returned!")
+                }
+            } catch {
+                print("There was an error getting boards data!")
+            }
+        }.resume()
+        
+    }
+}
+
+class FetchAllBoards: ObservableObject {
+    
+    @Published var allBoards = [SearchBoards]()
+    
+    var accessToken: String
+    
+    init(accessToken: String) {
+        self.allBoards = []
+        self.accessToken = accessToken
+    }
+    
+    public func fetchAllBoards(accessToken: String) {
+        self.accessToken = accessToken
+        let url = URL(string: (apiURL + "/board/search"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let boardsData = data {
+                    let decodedData = try JSONDecoder().decode(AllBoards.self, from: boardsData)
+                    let decodedBoards = decodedData.search_result
+                DispatchQueue.main.async {
+                    self.allBoards = decodedBoards
+                }
+                } else {
+                    print("No boards data was returned!")
+                }
+            } catch {
+                print("There was an error getting all boards data!")
+            }
+        }.resume()
+        
+    }
+}
+
+
 class FetchProfile: ObservableObject {
 
     @Published var user_id: Int = 0
@@ -193,6 +279,96 @@ class FetchProfile: ObservableObject {
                 }
             } catch {
                 print("There was an error getting profile data!")
+            }
+        }.resume()
+    }
+}
+
+class FetchSpecificProfile: ObservableObject {
+
+    @Published var user_id: Int = 0
+    @Published var board_count: Int = 0
+    @Published var matches_count: Int = 0
+    @Published var name: String = ""
+    @Published var favourite_boards = [Boards]()
+    
+
+    var accessToken: String
+    var userID: Int
+
+    init(accessToken: String, userID: Int) {
+        favourite_boards = []
+        self.userID = userID
+        self.accessToken = accessToken
+    }
+    
+    public func fetchSpecificProfile() {
+        let url = URL(string: (apiURL + "/user/\(self.userID)"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let profileData = data {
+                    let decodedData = try JSONDecoder().decode(Profile.self, from: profileData)
+                    
+                DispatchQueue.main.async {
+                    self.user_id = decodedData.user_id
+                    self.name = decodedData.name
+                    self.board_count = decodedData.board_count
+                    self.matches_count = decodedData.matches_count
+                    self.favourite_boards = decodedData.favourite_boards
+                }
+                } else {
+                    print("No profile data was returned!")
+                }
+            } catch {
+                print("There was an error getting profile data!")
+            }
+        }.resume()
+    }
+}
+
+class FetchSpecificProfileActivity: ObservableObject {
+
+    @Published var activities = [Activity]()
+    
+    var accessToken: String
+    var userID: Int
+
+    init(accessToken: String, userID: Int) {
+        self.accessToken = accessToken
+        self.activities = []
+        self.userID = userID
+    }
+    
+    public func fetchSpecificProfileActivity(accessToken: String, userID: Int) {
+        self.accessToken = accessToken
+        self.userID = userID
+        let url = URL(string: (apiURL + "/user/\(self.userID)/activity"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let activityData = data {
+                    let decodedData = try JSONDecoder().decode(Activities.self, from: activityData)
+                    let decodedActivities = decodedData.matches
+                    
+                DispatchQueue.main.async {
+                    self.activities = decodedActivities
+                }
+                } else {
+                    print("No activity data was returned!")
+                }
+            } catch {
+                print("There was an error getting activity data!")
             }
         }.resume()
     }
