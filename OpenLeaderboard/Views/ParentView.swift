@@ -555,6 +555,9 @@ struct SpecificProfileView: View {
                     Divider()
                 }
             }.padding(.top, 20)
+            .onAppear {
+                self.fetchSpecificProfile.fetchSpecificProfile()
+            }
     }
     
     func getIconColor(iconInt: Int) -> Color {
@@ -838,7 +841,9 @@ struct BoardActivity: View {
                 }
                 Spacer()
             }
-        }.navigationBarTitle(Text("Board Activity"), displayMode: .inline)
+        }.navigationBarTitle(Text("Board Activity"), displayMode: .inline).onAppear{
+            self.fetchBoardsActivity.fetchBoardsActivity()
+        }
     }
 }
 
@@ -847,11 +852,19 @@ struct BoardDetails: View {
     var accessToken: String
     var boardId: Int
     @ObservedObject var fetchBoardDetails: FetchBoardDetails
+    @ObservedObject var joinBoardViewModel = JoinBoardViewModel()
+    @ObservedObject var leaveBoardViewModel = RemoveFromBoardViewModel()
+    
+    @State private var popupMessage = ""
+    @State private var showingPopup = false
     
     init(accessToken: String, boardId: Int) {
         self.accessToken = accessToken
         self.boardId = boardId
         self.fetchBoardDetails = FetchBoardDetails(accessToken: accessToken, boardId: boardId)
+        self.joinBoardViewModel.board_id = boardId
+        self.leaveBoardViewModel.board_id = boardId
+        self.leaveBoardViewModel.remove = false
     }
     
     var body: some View {
@@ -905,10 +918,53 @@ struct BoardDetails: View {
                     }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
                 }
                 Divider()
+                    .alert(isPresented:$showingPopup) {
+                        Alert(title: Text(self.popupMessage), message: Text(""), dismissButton: .default(Text("OK")) {
+                            self.popupMessage = ""
+                            self.showingPopup = false
+                        })
+                    }
             }
-        }.navigationBarTitle(Text("\(fetchBoardDetails.board_name)"), displayMode: .inline).onAppear{
+        }.navigationBarTitle(Text("\(fetchBoardDetails.board_name)"), displayMode: .inline)
+        .onAppear {
             fetchBoardDetails.fetchBoardDetails(accessToken: self.accessToken, boardId: self.boardId)
         }
+        .onDisappear {
+            self.popupMessage = ""
+            self.showingPopup = false
+        }
+        .navigationBarItems(trailing: Button(action: {
+            if !fetchBoardDetails.is_member && fetchBoardDetails.is_public {
+                // synchronous join then reload
+                if joinBoard() {
+                    self.popupMessage = "Joined \(self.fetchBoardDetails.board_name)!"
+                    self.showingPopup = true
+                }
+                fetchBoardDetails.fetchBoardDetails(accessToken: self.accessToken, boardId: self.boardId)
+            }
+            else if fetchBoardDetails.is_member && !fetchBoardDetails.is_admin {
+                // synchronous leave then reload
+                if leaveBoard() {
+                    self.popupMessage = "Left \(self.fetchBoardDetails.board_name)!"
+                    self.showingPopup = true
+                }
+                fetchBoardDetails.fetchBoardDetails(accessToken: self.accessToken, boardId: self.boardId)
+            }
+        }) {
+            VStack {
+                // Spacer()
+                if !fetchBoardDetails.is_member && fetchBoardDetails.is_public {
+                    Image(systemName: "plus.square.fill")
+                            .resizable()
+                            .frame(width: 32.0, height: 32.0)
+                }
+                else if fetchBoardDetails.is_member && !fetchBoardDetails.is_admin {
+                    Image(systemName: "minus.square.fill")
+                            .resizable()
+                            .frame(width: 32.0, height: 32.0)
+                }
+            }
+        })
     }
     
     func getIconColor(iconInt: Int) -> Color {
@@ -923,6 +979,98 @@ struct BoardDetails: View {
             return bronze
         }
     }
+    
+    func joinBoard() -> Bool {
+        
+        struct JoinBoardResponse: Decodable {
+            let success: Bool
+            let message: String
+        }
+        var success = false
+        let sem = DispatchSemaphore.init(value: 0)
+        
+        guard let encoded = try? JSONEncoder().encode(joinBoardViewModel)
+        else {
+            print("Failed to encode creation of join board request")
+            return false
+        }
+        
+        let url = URL(string: (apiURL + "/board/join"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "POST"
+        request.httpBody = encoded
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            defer { sem.signal() } // bad jank
+            guard let data = data else {
+                print("No data in response: \(error?.localizedDescription ?? "Unknown error").")
+                return
+            }
+            
+            if let joinBoardResponse = try? JSONDecoder().decode(JoinBoardResponse.self, from: data) {
+                print("Board joined successfully!")
+                if (joinBoardResponse.success) {
+                    success = true
+                }
+            } else {
+                print("Invalid response from server")
+                
+            }
+        }.resume()
+        
+        sem.wait() // bad
+        
+        return success
+    }
+    
+    func leaveBoard() -> Bool {
+        
+        struct LeaveBoardResponse: Decodable {
+            let success: Bool
+            let message: String
+        }
+        var success = false
+        let sem = DispatchSemaphore.init(value: 0)
+        
+        guard let encoded = try? JSONEncoder().encode(leaveBoardViewModel)
+        else {
+            print("Failed to encode creation of leave board request")
+            return false
+        }
+        
+        let url = URL(string: (apiURL + "/board/remove"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "POST"
+        request.httpBody = encoded
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            defer { sem.signal() } // bad jank
+            guard let data = data else {
+                print("No data in response: \(error?.localizedDescription ?? "Unknown error").")
+                return
+            }
+            
+            if let leaveBoardResponse = try? JSONDecoder().decode(LeaveBoardResponse.self, from: data) {
+                print("Board left successfully!")
+                if (leaveBoardResponse.success) {
+                    success = true
+                }
+            } else {
+                print("Invalid response from server")
+                
+            }
+        }.resume()
+        
+        sem.wait() // bad
+        
+        return success
+    }
 }
 
 struct BoardMembersView: View {
@@ -933,6 +1081,7 @@ struct BoardMembersView: View {
     var isAdmin: Bool
     var accessToken: String
     var boardId: Int
+    var is_admin = false
     @ObservedObject var fetchMembers: FetchBoardMembers
     @ObservedObject var fetchProfile: FetchProfile
     
@@ -979,11 +1128,13 @@ struct BoardMembersView: View {
                 }
             }
         }.navigationBarTitle(Text("Board Members"), displayMode: .inline)
-        
+        .onAppear {
+            self.fetchMembers.fetchBoardMembers()
+        }
         .navigationBarItems(trailing: Button(action: {self.enableAddMember = true}) {
-            VStack {
-                Spacer()
-                if(isAdmin){
+            if self.isAdmin {
+                VStack {
+                    Spacer()
                     Image(systemName: "person.fill.badge.plus")
                             .resizable()
                             .frame(width: 32.0, height: 32.0)
