@@ -33,6 +33,16 @@ struct Boards: Codable, Hashable {
     public var losses = 0
 }
 
+struct SearchBoards: Codable, Hashable {
+    public var id = 0
+    public var name = ""
+    public var member_count = 0
+}
+
+struct AllBoards: Codable {
+    let search_result: [SearchBoards]
+}
+
 struct AllUsers: Codable {
     let search_result: [Users]
 }
@@ -119,7 +129,7 @@ struct TabParent: View {
                     Image(systemName: "plus")
                     Text("Submit Match")
                 }
-            SearchView()
+            SearchView(accessToken: userData.access_token)
                 .tabItem {
                     Image(systemName: "magnifyingglass")
                     Text("Search")
@@ -399,6 +409,7 @@ struct ProfileView: View {
         self.fetchProfile = FetchProfile(accessToken: accessToken)
     }
     
+    
     var body: some View {
         NavigationView {
             VStack{
@@ -475,6 +486,91 @@ struct ProfileView: View {
     }
 }
 
+struct SpecificProfileView: View {
+    
+    var accessToken: String
+    var userID: Int
+    @ObservedObject var fetchSpecificProfile: FetchSpecificProfile
+    
+    init(accessToken: String, userID: Int) {
+        self.accessToken = accessToken
+        self.userID = userID
+        self.fetchSpecificProfile = FetchSpecificProfile(accessToken: accessToken, userID: userID)
+    }
+    
+    
+    var body: some View {
+
+            VStack{
+                Text("\(fetchSpecificProfile.name)").font(.largeTitle).bold()
+                Divider()
+                Text("Top Boards").font(.system(size: 23)).padding(.top, 30)
+                VStack (alignment: .leading) {
+                    ForEach(fetchSpecificProfile.favourite_boards, id: \.self) { board in
+                        HStack {
+                            HStack {
+                                Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                                VStack (alignment: .leading) {
+                                    Text(board.board_name)
+                                    Text("#\(board.rank) of \(board.users_count)")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                            }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                            Spacer()
+                            HStack {
+                                VStack (alignment: .trailing) {
+                                    Text(String(format: "%.1f", board.rating))
+                                    Text("\(board.wins)W / \(board.losses)L")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                        }
+                        Divider()
+                    }
+                }.padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
+                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                Spacer()
+                
+                VStack {
+                    Divider()
+                    NavigationLink(destination: SpecificProfileBoards(accessToken: accessToken, userID: userID)) {
+                        HStack {
+                            Text("Boards").foregroundColor(Color(UIColor.label))
+                            Spacer()
+                            Text("\(fetchSpecificProfile.board_count)").foregroundColor(Color(UIColor.label))
+                            Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                    }
+                    Divider()
+                    NavigationLink(destination: SpecificProfileActivity(accessToken: accessToken, userID: self.userID)) {
+                        HStack {
+                            Text("Activity").foregroundColor(Color(UIColor.label))
+                            Spacer()
+                            Text("\(fetchSpecificProfile.matches_count)").foregroundColor(Color(UIColor.label))
+                            Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                    }
+                    Divider()
+                }
+            }.padding(.top, 20)
+    }
+    
+    func getIconColor(iconInt: Int) -> Color {
+        switch iconInt {
+        case 1:
+            return platinum
+        case 2:
+            return gold
+        case 3:
+            return silver
+        default:
+            return bronze
+        }
+    }
+}
+
 struct ProfileBoards: View {
     
     var accessToken: String
@@ -534,6 +630,68 @@ struct ProfileBoards: View {
     }
 }
 
+struct SpecificProfileBoards: View {
+    
+    var accessToken: String
+    var userID: Int
+    @ObservedObject var fetchSpecificProfileBoards: FetchSpecificProfileBoards
+    
+    init(accessToken: String, userID: Int) {
+        self.accessToken = accessToken
+        self.userID = userID
+        self.fetchSpecificProfileBoards = FetchSpecificProfileBoards(accessToken: accessToken, userID: userID)
+        self.fetchSpecificProfileBoards.fetchSpecificProfileBoards(accessToken: self.accessToken, userID: self.userID)
+    }
+    
+    var body: some View {
+        VStack{
+            ScrollView {
+                VStack (alignment: .leading) {
+                    ForEach(fetchSpecificProfileBoards.boards, id: \.self) { board in
+                        HStack {
+                            HStack {
+                                Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                                VStack (alignment: .leading) {
+                                    Text(board.board_name)
+                                    Text("#\(board.rank) of \(board.users_count)")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                            }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
+                            Spacer()
+                            HStack {
+                                VStack (alignment: .trailing) {
+                                    Text("\(board.rating,specifier: "%.1f")")
+                                    Text("\(board.wins)W / \(board.losses)L")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                        Divider()
+                    }
+                }
+                Spacer()
+                Spacer()
+            }
+        }.navigationBarTitle(Text("Boards"), displayMode: .inline)
+    }
+    
+    func getIconColor(iconInt: Int) -> Color {
+        switch iconInt {
+        case 1:
+            return platinum
+        case 2:
+            return gold
+        case 3:
+            return silver
+        default:
+            return bronze
+        }
+    }
+}
+
+
 struct ProfileActivity: View {
     
     var accessToken: String
@@ -582,6 +740,60 @@ struct ProfileActivity: View {
                 Spacer()
             }
         }.navigationBarTitle(Text("My Activity"), displayMode: .inline)
+    }
+}
+
+
+struct SpecificProfileActivity: View {
+    
+    var accessToken: String
+    var userID: Int
+    @ObservedObject var fetchSpecificProfileActivity: FetchSpecificProfileActivity
+    
+    init(accessToken: String, userID: Int) {
+        self.accessToken = accessToken
+        self.userID = userID
+        self.fetchSpecificProfileActivity = FetchSpecificProfileActivity(accessToken: accessToken, userID: userID)
+        self.fetchSpecificProfileActivity.fetchSpecificProfileActivity(accessToken: self.accessToken, userID: self.userID)
+    }
+    
+    var body: some View {
+        VStack {
+            ScrollView {
+                VStack (alignment: .leading) {
+                    ForEach(fetchSpecificProfileActivity.activities, id: \.self) { activity in
+                        HStack {
+                            HStack {
+                                VStack (alignment: .leading) {
+                                    Text(activity.board_name)
+                                    Text("Played \(activity.opponent_name)")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                            }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
+                            Spacer()
+                            HStack {
+                                VStack (alignment: .trailing) {
+                                    Text(activity.result)
+                                    if activity.rating_change > 0 {
+                                        Text("+\(activity.rating_change, specifier: "%.1f")")
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.gray)
+                                    }else{
+                                        Text("\(activity.rating_change, specifier: "%.1f")")
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.gray)
+                                    }
+                                        
+                                }
+                            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
+                        }.frame(height: 55)
+                        Divider()
+                    }
+                }
+                Spacer()
+            }
+        }.navigationBarTitle(Text("Activity"), displayMode: .inline)
     }
 }
 
@@ -675,7 +887,7 @@ struct BoardDetails: View {
             
             VStack {
                 Divider()
-                NavigationLink(destination: BoardMembersView(accessToken: accessToken, boardId: self.boardId)) {
+                NavigationLink(destination: BoardMembersView(accessToken: accessToken, boardId: self.boardId, isAdmin: self.fetchBoardDetails.is_admin)) {
                     HStack {
                         Text("Members").foregroundColor(Color(UIColor.label))
                         Spacer()
@@ -718,14 +930,18 @@ struct BoardMembersView: View {
     @State var selectedTag: String?
     @State var enableAddMember = false
     
+    var isAdmin: Bool
     var accessToken: String
     var boardId: Int
     @ObservedObject var fetchMembers: FetchBoardMembers
+    @ObservedObject var fetchProfile: FetchProfile
     
-    init(accessToken: String, boardId: Int) {
+    init(accessToken: String, boardId: Int, isAdmin: Bool) {
         self.accessToken = accessToken
         self.boardId = boardId
+        self.isAdmin = isAdmin
         self.fetchMembers = FetchBoardMembers(accessToken: accessToken,  boardID: self.boardId)
+        self.fetchProfile = FetchProfile(accessToken: accessToken)
     }
     
     var body: some View {
@@ -763,12 +979,15 @@ struct BoardMembersView: View {
                 }
             }
         }.navigationBarTitle(Text("Board Members"), displayMode: .inline)
+        
         .navigationBarItems(trailing: Button(action: {self.enableAddMember = true}) {
             VStack {
                 Spacer()
-                Image(systemName: "person.fill.badge.plus")
-                        .resizable()
-                        .frame(width: 32.0, height: 32.0)
+                if(isAdmin){
+                    Image(systemName: "person.fill.badge.plus")
+                            .resizable()
+                            .frame(width: 32.0, height: 32.0)
+                }
             }
         })
     }
@@ -1094,9 +1313,120 @@ struct AddMemberView: View {
 
 
 struct SearchView: View {
-    var body: some View {
-        Text("Search Screen")
+    
+    var accessToken: String
+    @State private var menuIndex: Int = 0
+    @State private var navigateTo: String? = nil
+    @ObservedObject var fetchAllBoards: FetchAllBoards
+    @ObservedObject var fetchUsers: FetchUsers
+    
+    init(accessToken: String) {
+        self.accessToken = accessToken
+        self.fetchAllBoards = FetchAllBoards(accessToken: accessToken)
+        self.fetchUsers = FetchUsers(accessToken: accessToken)
     }
+    
+    var body: some View {
+        NavigationView {
+            ZStack {
+                VStack {
+                    Picker(selection: $menuIndex, label: Text("Search Type")) {
+                        Text("Boards").tag(0)
+                        Text("Users").tag(1)
+                    }.pickerStyle(SegmentedPickerStyle())
+                    if (menuIndex == 0) {
+                        ScrollView {
+                            VStack (alignment: .leading) {
+                                ForEach(fetchAllBoards.allBoards, id: \.self) { board in
+                                    HStack {
+                                        NavigationLink(destination: BoardDetails(accessToken: self.accessToken, boardId: board.id)) {
+                                            HStack {
+                                                VStack (alignment: .leading) {
+                                                    Text("\(board.name)")
+                                                        .foregroundColor(Color(UIColor.label))
+                                                    if(board.member_count == 1){
+                                                        Text("\(board.member_count) Member")
+                                                            .font(.system(size: 15))
+                                                            .foregroundColor(.gray)
+                                                    }else {
+                                                        Text("\(board.member_count) Members")
+                                                            .font(.system(size: 15))
+                                                            .foregroundColor(.gray)
+                                                    }
+                                                    
+                                                        
+                                                }
+                                            }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                            Spacer()
+                                            HStack {
+                                                Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                                            }
+                                        }.navigationBarTitle(Text("Search"), displayMode: .inline)
+                                        .padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 20))
+                                    }
+                                    Divider()
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        ScrollView {
+                            VStack (alignment: .leading) {
+                                ForEach(fetchUsers.userResults, id: \.self) { user in
+                                    HStack {
+                                        NavigationLink(destination: SpecificProfileView(accessToken: self.accessToken, userID: user.id)) {
+                                            HStack {
+                                                VStack (alignment: .leading) {
+                                                    Text("\(user.name)")
+                                                        .foregroundColor(Color(UIColor.label))
+                                                    if(user.board_count == 1){
+                                                        Text("\(user.board_count) Board")
+                                                            .font(.system(size: 15))
+                                                            .foregroundColor(.gray)
+                                                    }else {
+                                                        Text("\(user.board_count) Boards")
+                                                            .font(.system(size: 15))
+                                                            .foregroundColor(.gray)
+                                                    }
+                                                    
+                                                        
+                                                }
+                                            }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                            Spacer()
+                                            HStack {
+                                                Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                                            }
+                                            }.padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 20))
+                                        }
+                                    Divider()
+                                        
+                                    }
+                                
+                                }
+                        }
+                    }
+                }
+            }.onAppear {
+                self.fetchAllBoards.fetchAllBoards(accessToken: self.accessToken)
+                self.fetchUsers.fetchUsers(accessToken: self.accessToken)
+            }
+        }
+        
+    }
+    
+    func getIconColor(iconInt: Int) -> Color {
+        switch iconInt {
+        case 1:
+            return platinum
+        case 2:
+            return gold
+        case 3:
+            return silver
+        default:
+            return bronze
+        }
+    }
+    
 }
 
 struct BoardActivityView: View {
