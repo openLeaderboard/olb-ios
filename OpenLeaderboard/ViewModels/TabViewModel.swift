@@ -90,6 +90,36 @@ class FetchUsers: ObservableObject {
             }
         }.resume()
     }
+    
+    public func searchUsers(searchTerm: String) {
+        if searchTerm == "" {
+            fetchUsers(accessToken: self.accessToken)
+            return
+        }
+        
+        let url = URL(string: (apiURL + "/user/search/" + searchTerm))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let usersData = data {
+                    let decodedData = try JSONDecoder().decode(AllUsers.self, from: usersData)
+                    let decodedUsers = decodedData.search_result
+                    DispatchQueue.main.async {
+                        self.userResults = decodedUsers
+                    }
+                } else {
+                    print("No users data was returned!")
+                }
+            } catch {
+                print("There was an error getting users data: \(error)")
+            }
+        }.resume()
+    }
 }
 
 
@@ -234,6 +264,36 @@ class FetchAllBoards: ObservableObject {
             }
         }.resume()
         
+    }
+    
+    public func searchBoards(searchTerm: String) {
+        if searchTerm == "" {
+            fetchAllBoards(accessToken: self.accessToken)
+            return
+        }
+        
+        let url = URL(string: (apiURL + "/board/search/" + searchTerm))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let boardsData = data {
+                    let decodedData = try JSONDecoder().decode(AllBoards.self, from: boardsData)
+                    let decodedBoards = decodedData.search_result
+                DispatchQueue.main.async {
+                    self.allBoards = decodedBoards
+                }
+                } else {
+                    print("No boards data was returned!")
+                }
+            } catch {
+                print("There was an error getting all boards data!")
+            }
+        }.resume()
     }
 }
 

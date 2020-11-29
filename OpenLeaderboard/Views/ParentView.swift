@@ -1466,6 +1466,7 @@ struct AddMemberView: View {
 struct SearchView: View {
     
     var accessToken: String
+    @State private var searchTerm: String = ""
     @State private var menuIndex: Int = 0
     @State private var navigateTo: String? = nil
     @ObservedObject var fetchAllBoards: FetchAllBoards
@@ -1478,89 +1479,95 @@ struct SearchView: View {
     }
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                VStack {
-                    Picker(selection: $menuIndex, label: Text("Search Type")) {
-                        Text("Boards").tag(0)
-                        Text("Users").tag(1)
-                    }.pickerStyle(SegmentedPickerStyle())
-                    if (menuIndex == 0) {
-                        ScrollView {
-                            VStack (alignment: .leading) {
-                                ForEach(fetchAllBoards.allBoards, id: \.self) { board in
-                                    HStack {
-                                        NavigationLink(destination: BoardDetails(accessToken: self.accessToken, boardId: board.id)) {
-                                            HStack {
-                                                VStack (alignment: .leading) {
-                                                    Text("\(board.name)")
-                                                        .foregroundColor(Color(UIColor.label))
-                                                    if(board.member_count == 1){
-                                                        Text("\(board.member_count) Member")
-                                                            .font(.system(size: 15))
-                                                            .foregroundColor(.gray)
-                                                    }else {
-                                                        Text("\(board.member_count) Members")
-                                                            .font(.system(size: 15))
-                                                            .foregroundColor(.gray)
-                                                    }
-                                                    
-                                                        
+        ZStack {
+            VStack {
+                TextField("Search...", text: self.$searchTerm, onCommit: {
+                    fetchUsers.searchUsers(searchTerm: searchTerm)
+                    fetchAllBoards.searchBoards(searchTerm: searchTerm)
+                })
+                    .padding()
+                    .foregroundColor(Color.black)
+                    .background(Color.init(UIColor.systemGray6))
+                    .cornerRadius(20.0)
+                Picker(selection: $menuIndex, label: Text("Search Type")) {
+                    Text("Boards").tag(0)
+                    Text("Users").tag(1)
+                }.pickerStyle(SegmentedPickerStyle())
+                if (menuIndex == 0) {
+                    ScrollView {
+                        VStack (alignment: .leading) {
+                            ForEach(fetchAllBoards.allBoards, id: \.self) { board in
+                                HStack {
+                                    NavigationLink(destination: BoardDetails(accessToken: self.accessToken, boardId: board.id)) {
+                                        HStack {
+                                            VStack (alignment: .leading) {
+                                                Text("\(board.name)")
+                                                    .foregroundColor(Color(UIColor.label))
+                                                if(board.member_count == 1){
+                                                    Text("\(board.member_count) Member")
+                                                        .font(.system(size: 15))
+                                                        .foregroundColor(.gray)
+                                                }else {
+                                                    Text("\(board.member_count) Members")
+                                                        .font(.system(size: 15))
+                                                        .foregroundColor(.gray)
                                                 }
-                                            }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
-                                            Spacer()
-                                            HStack {
-                                                Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                                                
+                                                    
                                             }
-                                        }.navigationBarTitle(Text("Search"), displayMode: .inline)
-                                        .padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 20))
-                                    }
-                                    Divider()
+                                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                        Spacer()
+                                        HStack {
+                                            Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                                        }
+                                    }.navigationBarTitle(Text("Search"), displayMode: .inline)
+                                    .padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 20))
                                 }
+                                Divider()
                             }
                         }
                     }
-                    else {
-                        ScrollView {
-                            VStack (alignment: .leading) {
-                                ForEach(fetchUsers.userResults, id: \.self) { user in
-                                    HStack {
-                                        NavigationLink(destination: SpecificProfileView(accessToken: self.accessToken, userID: user.id)) {
-                                            HStack {
-                                                VStack (alignment: .leading) {
-                                                    Text("\(user.name)")
-                                                        .foregroundColor(Color(UIColor.label))
-                                                    if(user.board_count == 1){
-                                                        Text("\(user.board_count) Board")
-                                                            .font(.system(size: 15))
-                                                            .foregroundColor(.gray)
-                                                    }else {
-                                                        Text("\(user.board_count) Boards")
-                                                            .font(.system(size: 15))
-                                                            .foregroundColor(.gray)
-                                                    }
-                                                    
-                                                        
+                }
+                else {
+                    ScrollView {
+                        VStack (alignment: .leading) {
+                            ForEach(fetchUsers.userResults, id: \.self) { user in
+                                HStack {
+                                    NavigationLink(destination: SpecificProfileView(accessToken: self.accessToken, userID: user.id)) {
+                                        HStack {
+                                            VStack (alignment: .leading) {
+                                                Text("\(user.name)")
+                                                    .foregroundColor(Color(UIColor.label))
+                                                if(user.board_count == 1){
+                                                    Text("\(user.board_count) Board")
+                                                        .font(.system(size: 15))
+                                                        .foregroundColor(.gray)
+                                                }else {
+                                                    Text("\(user.board_count) Boards")
+                                                        .font(.system(size: 15))
+                                                        .foregroundColor(.gray)
                                                 }
-                                            }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
-                                            Spacer()
-                                            HStack {
-                                                Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                                                
+                                                    
                                             }
-                                            }.padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 20))
+                                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                        Spacer()
+                                        HStack {
+                                            Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                                         }
-                                    Divider()
-                                        
+                                        }.padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 20))
                                     }
-                                
+                                Divider()
+                                    
                                 }
-                        }
+                            
+                            }
                     }
                 }
-            }.onAppear {
-                self.fetchAllBoards.fetchAllBoards(accessToken: self.accessToken)
-                self.fetchUsers.fetchUsers(accessToken: self.accessToken)
             }
+        }.onAppear {
+            self.fetchAllBoards.searchBoards(searchTerm: self.searchTerm)
+            self.fetchUsers.searchUsers(searchTerm: self.searchTerm)
         }
         
     }
