@@ -1344,6 +1344,7 @@ struct AddMemberView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State var userToAdd = Users()
+    @State var searchTerm = ""
     
     var boardID: Int
     var accessToken: String
@@ -1359,6 +1360,14 @@ struct AddMemberView: View {
         
     var body: some View {
         VStack{
+            TextField("Search...", text: self.$searchTerm, onCommit: {
+                fetchUsersToAdd.searchUsersToAdd(searchTerm: searchTerm)
+            })
+            .padding()
+                .foregroundColor(Color.black)
+                .background(Color.init(UIColor.systemGray6))
+                .cornerRadius(20.0)
+                .padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
             ScrollView {
                 VStack (alignment: .leading) {
                     ForEach(fetchUsersToAdd.userResults, id: \.self) { user in
@@ -1413,7 +1422,7 @@ struct AddMemberView: View {
             Spacer()
             Spacer()
         }.navigationBarTitle(Text("Add Member"), displayMode: .inline).onAppear{
-            self.fetchUsersToAdd.fetchUsersToAdd()
+            fetchUsersToAdd.searchUsersToAdd(searchTerm: searchTerm)
         }.onDisappear{
             confirmationMessage = ""
             showingConfirmation = false
