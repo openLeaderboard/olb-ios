@@ -19,6 +19,7 @@
 		2C7B15AE253B597200D09EF0 /* OpenLeaderboardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B15AD253B597200D09EF0 /* OpenLeaderboardUITests.swift */; };
 		661D72332573663F00C0BD16 /* JoinBoardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 661D72322573663F00C0BD16 /* JoinBoardViewModel.swift */; };
 		661D7238257368A600C0BD16 /* RemoveFromBoardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 661D7237257368A600C0BD16 /* RemoveFromBoardViewModel.swift */; };
+		6643C8BF2574DC27001B287B /* SubmitMatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6643C8BE2574DC27001B287B /* SubmitMatchViewModel.swift */; };
 		F75964D2254E224E00E2D9D8 /* AddBoardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F75964D1254E224800E2D9D8 /* AddBoardViewModel.swift */; };
 		F7894D50254B97F7003D2462 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7894D4F254B97F7003D2462 /* LoginViewModel.swift */; };
 		F7894D5C254BA482003D2462 /* ParentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7894D5B254BA482003D2462 /* ParentView.swift */; };
@@ -62,6 +63,7 @@
 		2C7B15AF253B597200D09EF0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		661D72322573663F00C0BD16 /* JoinBoardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinBoardViewModel.swift; sourceTree = "<group>"; };
 		661D7237257368A600C0BD16 /* RemoveFromBoardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoveFromBoardViewModel.swift; sourceTree = "<group>"; };
+		6643C8BE2574DC27001B287B /* SubmitMatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubmitMatchViewModel.swift; sourceTree = "<group>"; };
 		F75964D1254E224800E2D9D8 /* AddBoardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddBoardViewModel.swift; sourceTree = "<group>"; };
 		F7894D4F254B97F7003D2462 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		F7894D5B254BA482003D2462 /* ParentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParentView.swift; sourceTree = "<group>"; };
@@ -175,6 +177,7 @@
 				2C5FD07D25717F8B001104E8 /* AddMemberViewModel.swift */,
 				661D72322573663F00C0BD16 /* JoinBoardViewModel.swift */,
 				661D7237257368A600C0BD16 /* RemoveFromBoardViewModel.swift */,
+				6643C8BE2574DC27001B287B /* SubmitMatchViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -327,6 +330,7 @@
 				2C7B158C253B596E00D09EF0 /* AppDelegate.swift in Sources */,
 				2C7B158E253B596E00D09EF0 /* SceneDelegate.swift in Sources */,
 				F7894D5C254BA482003D2462 /* ParentView.swift in Sources */,
+				6643C8BF2574DC27001B287B /* SubmitMatchViewModel.swift in Sources */,
 				661D72332573663F00C0BD16 /* JoinBoardViewModel.swift in Sources */,
 				F7894D62254BA603003D2462 /* TabViewModel.swift in Sources */,
 				2C7B1590253B596E00D09EF0 /* AuthView.swift in Sources */,

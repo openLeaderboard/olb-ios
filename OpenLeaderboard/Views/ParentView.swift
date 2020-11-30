@@ -1129,7 +1129,7 @@ struct BoardMembersView: View {
             }
         }.navigationBarTitle(Text("Board Members"), displayMode: .inline)
         .onAppear {
-            self.fetchMembers.fetchBoardMembers()
+            self.fetchMembers.fetchBoardMembers(boardId: self.boardId)
         }
         .navigationBarItems(trailing: Button(action: {self.enableAddMember = true}) {
             if self.isAdmin {
@@ -1160,6 +1160,8 @@ struct BoardMembersView: View {
 
 struct SubmitMatchView: View {
     
+    @EnvironmentObject var userData: UserData
+    
     var accessToken: String
     @State var boardExpansion: Bool = false
     @State var opponentExpansion: Bool = false
@@ -1167,160 +1169,251 @@ struct SubmitMatchView: View {
     @State var selectedBoard: Boards = Boards()
     @State var selectedOpponent: BoardMembersModel = BoardMembersModel()
     @State var selectedResult: String = ""
-    @State var fetchBoardMembers: FetchBoardMembers = FetchBoardMembers(accessToken: "",  boardID: 0)
+    @State private var popupMessage = ""
+    @State private var showingPopup = false
+    @ObservedObject var fetchBoardMembers: FetchBoardMembers
     @ObservedObject var fetchBoards: FetchBoards
+    @ObservedObject var submitMatchViewModel = SubmitMatchViewModel()
     
     init(accessToken: String) {
         self.accessToken = accessToken
         self.fetchBoards = FetchBoards(accessToken: accessToken)
+        self.fetchBoardMembers = FetchBoardMembers(accessToken: accessToken,  boardID: 0)
     }
     
     var body: some View {
         NavigationView {
-            List {
-                HStack {
-                    Text("Board")
-                    Spacer()
-                    VStack (alignment: .trailing) {
-                        Text((self.selectedBoard.board_name != "" ? "\(self.selectedBoard.board_name)" : "No board selected")).foregroundColor(.gray)
-                    }
-                }.onTapGesture {
-                    self.boardExpansion = !self.boardExpansion
-                    self.opponentExpansion = false
-                    self.resultExpansion = false
-                }; if self.boardExpansion {
-                    VStack (alignment: .leading) {
-                        ForEach(fetchBoards.boards, id: \.self) { board in
-                            HStack {
+            VStack {
+                List {
+                    HStack {
+                        Text("Board")
+                        Spacer()
+                        VStack (alignment: .trailing) {
+                            Text((self.selectedBoard.board_name != "" ? "\(self.selectedBoard.board_name)" : "No board selected")).foregroundColor(.gray)
+                        }
+                    }.onTapGesture {
+                        self.boardExpansion = !self.boardExpansion
+                        self.opponentExpansion = false
+                        self.resultExpansion = false
+                    }; if self.boardExpansion {
+                        VStack (alignment: .leading) {
+                            ForEach(fetchBoards.boards, id: \.self) { board in
                                 HStack {
-                                    Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
-                                    VStack (alignment: .leading) {
-                                        Text(board.board_name)
-                                            .foregroundColor(Color(UIColor.label))
-                                        Text("#\(board.rank) of \(board.users_count)")
-                                            .font(.system(size: 15))
-                                            .foregroundColor(.gray)
-                                    }
-                                }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
-                                Spacer()
-                                HStack {
-                                    VStack (alignment: .trailing) {
-                                        Text(String(format: "%.1f", board.rating))
-                                            .foregroundColor(Color(UIColor.label))
-                                        Text("\(board.wins)W / \(board.losses)L")
-                                            .font(.system(size: 15))
-                                            .foregroundColor(.gray)
-                                    }
-                                }.padding(EdgeInsets(top: 10, leading: 0, bottom: 5, trailing: 20))
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                self.boardExpansion = !self.boardExpansion
-                                self.selectedBoard = board
-                                self.fetchBoardMembers = FetchBoardMembers(accessToken: self.accessToken, boardID: board.board_id)
+                                    HStack {
+                                        Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
+                                        VStack (alignment: .leading) {
+                                            Text(board.board_name)
+                                                .foregroundColor(Color(UIColor.label))
+                                            Text("#\(board.rank) of \(board.users_count)")
+                                                .font(.system(size: 15))
+                                                .foregroundColor(.gray)
+                                        }
+                                    }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                    Spacer()
+                                    HStack {
+                                        VStack (alignment: .trailing) {
+                                            Text(String(format: "%.1f", board.rating))
+                                                .foregroundColor(Color(UIColor.label))
+                                            Text("\(board.wins)W / \(board.losses)L")
+                                                .font(.system(size: 15))
+                                                .foregroundColor(.gray)
+                                        }
+                                    }.padding(EdgeInsets(top: 10, leading: 0, bottom: 5, trailing: 20))
+                                }
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    self.boardExpansion = !self.boardExpansion
+                                    self.selectedBoard = board
+                                    self.fetchBoardMembers.fetchBoardMembers(boardId: board.board_id)
+                                }
                             }
                         }
                     }
+                    HStack {
+                        Text("Opponent")
+                        Spacer()
+                        VStack (alignment: .trailing) {
+                            Text((self.selectedOpponent.name != "" ? "\(self.selectedOpponent.name)" : "No opponent selected")).foregroundColor(.gray)
+                        }
+                    }.onTapGesture {
+                        self.opponentExpansion = !self.opponentExpansion
+                        self.boardExpansion = false
+                        self.resultExpansion = false
+                    }; if (self.opponentExpansion && self.selectedBoard.board_name != "") {
+                        VStack (alignment: .leading) {
+                            ForEach(self.fetchBoardMembers.boardMembers, id: \.self) { opponent in
+                                if opponent.user_id != userData.userId {
+                                        HStack {
+                                            HStack {
+                                                Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: opponent.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                                                VStack (alignment: .leading) {
+                                                    Text(opponent.name)
+                                                    Text("#\(opponent.rank)")
+                                                        .font(.system(size: 15))
+                                                        .foregroundColor(.gray)
+                                                }
+                                            }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                            Spacer()
+                                            HStack {
+                                                VStack (alignment: .trailing) {
+                                                    Text("\(opponent.rating, specifier: "%.0f")")
+                                                    Text("\(opponent.wins)W / \(opponent.losses)L")
+                                                        .font(.system(size: 15))
+                                                        .foregroundColor(.gray)
+                                                }
+                                            }.padding(EdgeInsets(top: 10, leading: 0, bottom: 5, trailing: 20))
+                                        }
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            self.opponentExpansion = !self.opponentExpansion
+                                            self.selectedOpponent = opponent
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    HStack {
+                        Text("Result")
+                        Spacer()
+                        VStack (alignment: .trailing) {
+                            Text((self.selectedResult != "" ? "\(self.selectedResult)" : "No result selected")).foregroundColor(.gray)
+                        }
+                    }.onTapGesture {
+                        self.resultExpansion = !self.resultExpansion
+                        self.boardExpansion = false
+                        self.opponentExpansion = false
+                    }; if (self.resultExpansion && self.selectedOpponent.name != "") {
+                            VStack (alignment: .center) {
+                                HStack {
+                                    VStack {
+                                        Image(systemName: "hand.thumbsup.fill").foregroundColor((self.selectedResult == "Win" || self.selectedResult == "" ? thumbsUp : .gray))
+                                            .font(.system(size: 100))
+                                        Text("Win")
+                                    }.onTapGesture {
+                                        self.selectedResult = "Win"
+                                    }
+                                    .padding(EdgeInsets(top: 20, leading: 20, bottom: 0, trailing: 0))
+                                    Spacer()
+                                    VStack {
+                                        Image(systemName: "hand.thumbsdown.fill").foregroundColor((self.selectedResult == "Loss" || self.selectedResult == "" ? thumbsDown : .gray))
+                                            .font(.system(size: 100))
+                                        Text("Loss")
+                                    }.onTapGesture {
+                                        self.selectedResult = "Loss"
+                                    }.padding(EdgeInsets(top: 20, leading: 0, bottom: 0, trailing: 20))
+                                }
+                                VStack {
+                                    Image(systemName: "hands.clap.fill").foregroundColor((self.selectedResult == "Draw" || self.selectedResult == "" ? tie : .gray))
+                                        .font(.system(size: 100))
+                                    Text("Draw")
+                                }.onTapGesture {
+                                    self.selectedResult = "Draw"
+                                }.padding(EdgeInsets(top: 20, leading: 0, bottom: 20, trailing: 0))
+                                Button(action: trySubmitMatch) {
+                                    HStack(alignment: .center) {
+                                        Spacer()
+                                        Text("Submit Match").foregroundColor(btnColor).bold()
+                                        Spacer()
+                                    }
+                                }.padding()
+                                .background(bgColor)
+                                .cornerRadius(20.0)
+                                .buttonStyle(PlainButtonStyle())
+                            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                        }
+                    }.navigationBarTitle(Text("Submit Match"), displayMode: .inline)
+                    Spacer()
+                        .alert(isPresented:$showingPopup) {
+                            Alert(title: Text(self.popupMessage), message: Text(""), dismissButton: .default(Text("OK")) {
+                                self.popupMessage = ""
+                                self.showingPopup = false
+                            })
+                        }
                 }
-                HStack {
-                    Text("Opponent")
-                    Spacer()
-                    VStack (alignment: .trailing) {
-                        Text((self.selectedOpponent.name != "" ? "\(self.selectedOpponent.name)" : "No opponent selected")).foregroundColor(.gray)
-                    }
-                }.onTapGesture {
-                    self.opponentExpansion = !self.opponentExpansion
-                    self.boardExpansion = false
-                    self.resultExpansion = false
-                }; if (self.opponentExpansion && self.selectedBoard.board_name != "") {
-                    VStack (alignment: .leading) {
-                        ForEach(self.fetchBoardMembers.boardMembers, id: \.self) { opponent in
-                            HStack {
-                                HStack {
-                                    Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: opponent.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                                    VStack (alignment: .leading) {
-                                        Text(opponent.name)
-                                        Text("#\(opponent.rank)")
-                                            .font(.system(size: 15))
-                                            .foregroundColor(.gray)
-                                    }
-                                }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
-                                Spacer()
-                                HStack {
-                                    VStack (alignment: .trailing) {
-                                        Text("\(opponent.rating, specifier: "%.0f")")
-                                        Text("\(opponent.wins)W / \(opponent.losses)L")
-                                            .font(.system(size: 15))
-                                            .foregroundColor(.gray)
-                                    }
-                                }.padding(EdgeInsets(top: 10, leading: 0, bottom: 5, trailing: 20))
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                self.opponentExpansion = !self.opponentExpansion
-                                self.selectedOpponent = opponent
-                            }
-                            }
-                        }
-                    }
-                HStack {
-                    Text("Result")
-                    Spacer()
-                    VStack (alignment: .trailing) {
-                        Text((self.selectedResult != "" ? "\(self.selectedResult)" : "No result selected")).foregroundColor(.gray)
-                    }
-                }.onTapGesture {
-                    self.resultExpansion = !self.resultExpansion
-                    self.boardExpansion = false
-                    self.opponentExpansion = false
-                }; if (self.resultExpansion && self.selectedOpponent.name != "") {
-                        VStack (alignment: .center) {
-                            HStack {
-                                VStack {
-                                    Image(systemName: "hand.thumbsup.fill").foregroundColor((self.selectedResult == "Win" || self.selectedResult == "" ? thumbsUp : .gray))
-                                        .font(.system(size: 100))
-                                    Text("Win")
-                                }.onTapGesture {
-                                    self.selectedResult = "Win"
-                                }
-                                .padding(EdgeInsets(top: 20, leading: 20, bottom: 0, trailing: 0))
-                                Spacer()
-                                VStack {
-                                    Image(systemName: "hand.thumbsdown.fill").foregroundColor((self.selectedResult == "Loss" || self.selectedResult == "" ? thumbsDown : .gray))
-                                        .font(.system(size: 100))
-                                    Text("Loss")
-                                }.onTapGesture {
-                                    self.selectedResult = "Loss"
-                                }.padding(EdgeInsets(top: 20, leading: 0, bottom: 0, trailing: 20))
-                            }
-                            VStack {
-                                Image(systemName: "hands.clap.fill").foregroundColor((self.selectedResult == "Tie" || self.selectedResult == "" ? tie : .gray))
-                                    .font(.system(size: 100))
-                                Text("Tie")
-                            }.onTapGesture {
-                                self.selectedResult = "Tie"
-                            }.padding(EdgeInsets(top: 20, leading: 0, bottom: 20, trailing: 0))
-                            Button(action: submitMatch) {
-                                HStack(alignment: .center) {
-                                    Spacer()
-                                    Text("Submit Match").foregroundColor(btnColor).bold()
-                                    Spacer()
-                                }
-                            }.padding()
-                            .background(bgColor)
-                            .cornerRadius(20.0)
-                            .buttonStyle(PlainButtonStyle())
-                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
-                    }
-                }.navigationBarTitle(Text("Submit Match"), displayMode: .inline)
             }
-        .listStyle(GroupedListStyle()).onAppear{
+        .listStyle(GroupedListStyle())
+        .onAppear{
             self.fetchBoards.fetchBoards(accessToken: self.accessToken)
+        }
+        .onDisappear {
+            popupMessage = ""
+            showingPopup = false
         }
     }
     
-    func submitMatch() {
-        print("submit match")
+    func trySubmitMatch() {
+        if selectedResult == "" {
+            self.popupMessage = "You must select a result!"
+            self.showingPopup = true
+            return
+        }
+        
+        // synchronous submit then reset
+        
+        // put state variables in observableobject
+        submitMatchViewModel.board_id = selectedBoard.board_id
+        submitMatchViewModel.user_id = selectedOpponent.user_id
+        submitMatchViewModel.result = selectedResult
+        
+        if !submitMatch() {
+            // pop error with error message
+            return
+        }
+        
+        boardExpansion = false
+        opponentExpansion = false
+        resultExpansion = false
+        selectedBoard = Boards()
+        selectedOpponent = BoardMembersModel()
+        selectedResult = ""
+        self.popupMessage = "Match submitted!"
+        self.showingPopup = true
+    }
+    
+    func submitMatch() -> Bool {
+        
+        struct SubmitMatchResponse: Decodable {
+            let success: Bool
+            let message: String
+        }
+        var success = false
+        let sem = DispatchSemaphore.init(value: 0)
+        
+        guard let encoded = try? JSONEncoder().encode(submitMatchViewModel)
+        else {
+            print("Failed to encode creation of submit match request")
+            return false
+        }
+        
+        let url = URL(string: (apiURL + "/submit/"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "POST"
+        request.httpBody = encoded
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            defer { sem.signal() } // bad jank
+            guard let data = data else {
+                print("No data in response: \(error?.localizedDescription ?? "Unknown error").")
+                return
+            }
+            
+            if let submitMatchResponse = try? JSONDecoder().decode(SubmitMatchResponse.self, from: data) {
+                print("Match submitted successfully!")
+                if (submitMatchResponse.success) {
+                    success = true
+                }
+            } else {
+                print("Invalid response from server")
+                
+            }
+        }.resume()
+        
+        sem.wait() // bad
+        
+        return success
     }
     
     func getIconColor(iconInt: Int) -> Color {
