@@ -1169,8 +1169,11 @@ struct SubmitMatchView: View {
     @State var selectedBoard: Boards = Boards()
     @State var selectedOpponent: BoardMembersModel = BoardMembersModel()
     @State var selectedResult: String = ""
+    @State private var popupMessage = ""
+    @State private var showingPopup = false
     @ObservedObject var fetchBoardMembers: FetchBoardMembers
     @ObservedObject var fetchBoards: FetchBoards
+    @ObservedObject var submitMatchViewModel = SubmitMatchViewModel()
     
     init(accessToken: String) {
         self.accessToken = accessToken
@@ -1180,7 +1183,7 @@ struct SubmitMatchView: View {
     
     var body: some View {
         NavigationView {
-            ZStack {
+            VStack {
                 List {
                     HStack {
                         Text("Board")
@@ -1300,13 +1303,13 @@ struct SubmitMatchView: View {
                                     }.padding(EdgeInsets(top: 20, leading: 0, bottom: 0, trailing: 20))
                                 }
                                 VStack {
-                                    Image(systemName: "hands.clap.fill").foregroundColor((self.selectedResult == "Tie" || self.selectedResult == "" ? tie : .gray))
+                                    Image(systemName: "hands.clap.fill").foregroundColor((self.selectedResult == "Draw" || self.selectedResult == "" ? tie : .gray))
                                         .font(.system(size: 100))
-                                    Text("Tie")
+                                    Text("Draw")
                                 }.onTapGesture {
-                                    self.selectedResult = "Tie"
+                                    self.selectedResult = "Draw"
                                 }.padding(EdgeInsets(top: 20, leading: 0, bottom: 20, trailing: 0))
-                                Button(action: submitMatch) {
+                                Button(action: trySubmitMatch) {
                                     HStack(alignment: .center) {
                                         Spacer()
                                         Text("Submit Match").foregroundColor(btnColor).bold()
@@ -1319,16 +1322,98 @@ struct SubmitMatchView: View {
                             }.padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
                         }
                     }.navigationBarTitle(Text("Submit Match"), displayMode: .inline)
+                    Spacer()
+                        .alert(isPresented:$showingPopup) {
+                            Alert(title: Text(self.popupMessage), message: Text(""), dismissButton: .default(Text("OK")) {
+                                self.popupMessage = ""
+                                self.showingPopup = false
+                            })
+                        }
                 }
             }
         .listStyle(GroupedListStyle())
         .onAppear{
             self.fetchBoards.fetchBoards(accessToken: self.accessToken)
         }
+        .onDisappear {
+            popupMessage = ""
+            showingPopup = false
+        }
     }
     
-    func submitMatch() {
-        print("submit match")
+    func trySubmitMatch() {
+        if selectedResult == "" {
+            self.popupMessage = "You must select a result!"
+            self.showingPopup = true
+            return
+        }
+        
+        // synchronous submit then reset
+        
+        // put state variables in observableobject
+        submitMatchViewModel.board_id = selectedBoard.board_id
+        submitMatchViewModel.user_id = selectedOpponent.user_id
+        submitMatchViewModel.result = selectedResult
+        
+        if !submitMatch() {
+            // pop error with error message
+            return
+        }
+        
+        boardExpansion = false
+        opponentExpansion = false
+        resultExpansion = false
+        selectedBoard = Boards()
+        selectedOpponent = BoardMembersModel()
+        selectedResult = ""
+        self.popupMessage = "Match submitted!"
+        self.showingPopup = true
+    }
+    
+    func submitMatch() -> Bool {
+        
+        struct SubmitMatchResponse: Decodable {
+            let success: Bool
+            let message: String
+        }
+        var success = false
+        let sem = DispatchSemaphore.init(value: 0)
+        
+        guard let encoded = try? JSONEncoder().encode(submitMatchViewModel)
+        else {
+            print("Failed to encode creation of submit match request")
+            return false
+        }
+        
+        let url = URL(string: (apiURL + "/submit/"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "POST"
+        request.httpBody = encoded
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            defer { sem.signal() } // bad jank
+            guard let data = data else {
+                print("No data in response: \(error?.localizedDescription ?? "Unknown error").")
+                return
+            }
+            
+            if let submitMatchResponse = try? JSONDecoder().decode(SubmitMatchResponse.self, from: data) {
+                print("Match submitted successfully!")
+                if (submitMatchResponse.success) {
+                    success = true
+                }
+            } else {
+                print("Invalid response from server")
+                
+            }
+        }.resume()
+        
+        sem.wait() // bad
+        
+        return success
     }
     
     func getIconColor(iconInt: Int) -> Color {
