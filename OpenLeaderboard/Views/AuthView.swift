@@ -80,6 +80,7 @@ struct LoginView: View {
             let success: Bool
             let message: String
             let access_token: String
+            let user_id: Int
         }
         
         guard let encoded = try? JSONEncoder().encode(loginViewModel)
@@ -105,6 +106,7 @@ struct LoginView: View {
                 if (loginToken.success) {
                     self.userData.loggedIn = true
                     self.userData.access_token = loginToken.access_token
+                    self.userData.userId = loginToken.user_id
                 }
             } else {
                 print("Invalid response from server")
@@ -189,6 +191,7 @@ struct RegView: View {
             let success: Bool
             let message: String
             let access_token: String
+            let user_id: Int
         }
         
         guard let encoded = try? JSONEncoder().encode(authViewModel)
@@ -214,6 +217,7 @@ struct RegView: View {
                 if registrationToken.success {
                     self.userData.loggedIn = true
                     self.userData.access_token = registrationToken.access_token
+                    self.userData.userId = registrationToken.user_id
                 }
 //                self.confirmationMessage =
 //                    "User Created?: \(registrationToken.success)\n" +

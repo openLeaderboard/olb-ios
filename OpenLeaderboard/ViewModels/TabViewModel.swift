@@ -554,8 +554,8 @@ class FetchBoardMembers: ObservableObject {
         self.boardID = boardID
     }
     
-    public func fetchBoardMembers() {
-        let url = URL(string: (apiURL + "/board/\(self.boardID)/members"))!
+    public func fetchBoardMembers(boardId: Int) {
+        let url = URL(string: (apiURL + "/board/\(boardId)/members"))!
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
