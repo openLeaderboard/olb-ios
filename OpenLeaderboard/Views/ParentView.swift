@@ -1329,7 +1329,8 @@ struct SubmitMatchView: View {
                                 self.showingPopup = false
                             })
                         }
-                }
+                }.navigationBarTitle(Text("Search"), displayMode: .inline)
+                .navigationBarHidden(true)
             }
         .listStyle(GroupedListStyle())
         .onAppear{
@@ -1581,7 +1582,7 @@ struct SearchView: View {
     }
     
     var body: some View {
-        ZStack {
+        NavigationView {
             VStack {
                 TextField("Search...", text: self.$searchTerm, onCommit: {
                     fetchUsers.searchUsers(searchTerm: searchTerm)
@@ -1622,8 +1623,7 @@ struct SearchView: View {
                                         HStack {
                                             Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                                         }
-                                    }.navigationBarTitle(Text("Search"), displayMode: .inline)
-                                    .padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 20))
+                                    }
                                 }
                                 Divider()
                             }
@@ -1666,7 +1666,8 @@ struct SearchView: View {
                             }
                     }
                 }
-            }
+            }.navigationBarTitle(Text("Search"), displayMode: .inline)
+            .navigationBarHidden(true)
         }.onAppear {
             self.fetchAllBoards.searchBoards(searchTerm: self.searchTerm)
             self.fetchUsers.searchUsers(searchTerm: self.searchTerm)
