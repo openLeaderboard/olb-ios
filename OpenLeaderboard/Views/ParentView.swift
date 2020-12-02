@@ -107,6 +107,8 @@ struct BoardMembersModel: Codable, Hashable {
     public var wins = 0
     public var losses = 0
 }
+// MARK: Tab View
+
 
 struct TabParent: View {
     
@@ -146,7 +148,7 @@ struct TabParent: View {
     }
 }
 
-
+// MARK: Main Boards View
 struct MainBoardsView: View {
     
     var accessToken: String
@@ -289,6 +291,7 @@ struct MainBoardsView: View {
     
 }
 
+// MARK: Add Boards View
 struct AddBoardView: View {
     @Environment(\.presentationMode) var mode: Binding<PresentationMode>
     
@@ -399,6 +402,8 @@ struct AddBoardView: View {
     }
 }
 
+
+// MARK: Profile View
 struct ProfileView: View {
     
     var accessToken: String
@@ -486,6 +491,7 @@ struct ProfileView: View {
     }
 }
 
+// MARK: SpecificProfileView
 struct SpecificProfileView: View {
     
     var accessToken: String
@@ -574,6 +580,7 @@ struct SpecificProfileView: View {
     }
 }
 
+// MARK: Profile Boards View
 struct ProfileBoards: View {
     
     var accessToken: String
@@ -633,6 +640,7 @@ struct ProfileBoards: View {
     }
 }
 
+// MARK: Specific Profile Boards View
 struct SpecificProfileBoards: View {
     
     var accessToken: String
@@ -694,7 +702,7 @@ struct SpecificProfileBoards: View {
     }
 }
 
-
+// MARK: Profile Activity View
 struct ProfileActivity: View {
     
     var accessToken: String
@@ -746,7 +754,7 @@ struct ProfileActivity: View {
     }
 }
 
-
+// MARK: Specific Profile Activity View
 struct SpecificProfileActivity: View {
     
     var accessToken: String
@@ -800,6 +808,7 @@ struct SpecificProfileActivity: View {
     }
 }
 
+// MARK: Boards Activity View
 struct BoardActivity: View {
     
     var accessToken: String
@@ -847,6 +856,7 @@ struct BoardActivity: View {
     }
 }
 
+// MARK: Board Details
 struct BoardDetails: View {
     
     var accessToken: String
@@ -1073,6 +1083,7 @@ struct BoardDetails: View {
     }
 }
 
+// MARK: Board Members View
 struct BoardMembersView: View {
     
     @State var selectedTag: String?
@@ -1158,6 +1169,7 @@ struct BoardMembersView: View {
     
 }
 
+// MARK: Submit Match View
 struct SubmitMatchView: View {
     
     @EnvironmentObject var userData: UserData
@@ -1431,6 +1443,8 @@ struct SubmitMatchView: View {
     
 }
 
+
+// MARK: Add Members View
 struct AddMemberView: View {
    
     
@@ -1565,6 +1579,7 @@ struct AddMemberView: View {
 
 
 
+// MARK: Search View
 struct SearchView: View {
     
     var accessToken: String
@@ -1689,12 +1704,14 @@ struct SearchView: View {
     
 }
 
+
 struct BoardActivityView: View {
     var body: some View {
         Text("Board Activity")
     }
 }
 
+// MARK: Notifications View
 struct NotificationsView: View {
     var body: some View {
         Text("Notifications Screen")
