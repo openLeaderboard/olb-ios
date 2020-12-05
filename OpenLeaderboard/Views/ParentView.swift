@@ -108,6 +108,57 @@ struct BoardMembersModel: Codable, Hashable {
     public var losses = 0
 }
 
+struct OutgoingInviteModel: Codable, Hashable {
+    public var to_name = ""
+    public var invite_id = 0
+}
+
+struct IncomingInviteModel: Codable, Hashable {
+    public var from_name = ""
+    public var invite_id = 0
+}
+
+struct IncomingInviteDetailsModel: Codable, Hashable {
+    public var board_id: Int = 0
+    public var board_name : String = ""
+    public var is_public : Bool = true
+    public var member_count : Int = 0
+    public var from_id : Int = 0
+    public var from_name : String = ""
+    public var to_id : Int = 0
+    public var to_name : String = ""
+    public var invite_id : Int = 0
+}
+
+struct OutgoingInvites: Codable {
+    let invites: [OutgoingInviteModel]
+}
+
+struct IncomingInvites: Codable {
+    let invites: [IncomingInviteModel]
+}
+
+struct OutgoingMatchModel: Codable, Hashable {
+    public var to_name = ""
+    public var match_id = 0
+}
+
+struct IncomingMatchModel: Codable, Hashable {
+    public var from_name = ""
+    public var match_id = 0
+}
+
+struct IncomingMatches: Codable {
+    let matches: [IncomingMatchModel]
+}
+
+struct OutgoingMatches: Codable {
+    let matches: [OutgoingMatchModel]
+}
+
+// MARK: Tab View
+
+
 struct TabParent: View {
     
     @EnvironmentObject var userData: UserData
@@ -134,7 +185,7 @@ struct TabParent: View {
                     Image(systemName: "magnifyingglass")
                     Text("Search")
                 }
-            NotificationsView()
+            NotificationsView(accessToken: userData.access_token)
                 .tabItem {
                     Image(systemName: "bell.fill")
                     Text("Notifications")
@@ -146,7 +197,7 @@ struct TabParent: View {
     }
 }
 
-
+// MARK: Main Boards View
 struct MainBoardsView: View {
     
     var accessToken: String
@@ -203,15 +254,15 @@ struct MainBoardsView: View {
                                 NavigationLink(destination: AddBoardView(accessToken: self.accessToken), isActive: self.$enableCreateBoard) {
                                     EmptyView()
                                 }
-                                    .navigationBarTitle(Text("Boards"), displayMode: .inline)
+                                .navigationBarTitle(Text("Boards"), displayMode: .inline)
                                 .navigationBarItems(trailing: Button(action: {self.enableCreateBoard = true}) {
-                                        VStack {
-                                            Spacer()
-                                            Image(systemName: "note.text.badge.plus")
-                                                    .resizable()
-                                                    .frame(width: 30.0, height: 27.0)
-                                        }
-                                    })
+                                    VStack {
+                                        Spacer()
+                                        Image(systemName: "note.text.badge.plus")
+                                            .resizable()
+                                            .frame(width: 30.0, height: 27.0)
+                                    }
+                                })
                             }
                         }
                     }
@@ -252,15 +303,15 @@ struct MainBoardsView: View {
                                     NavigationLink(destination: AddBoardView(accessToken: self.accessToken), isActive: self.$enableCreateBoard) {
                                         EmptyView()
                                     }
-                                        .navigationBarTitle(Text("Boards"), displayMode: .inline)
+                                    .navigationBarTitle(Text("Boards"), displayMode: .inline)
                                     .navigationBarItems(trailing: Button(action: {self.enableCreateBoard = true}) {
-                                            VStack {
-                                                Spacer()
-                                                Image(systemName: "note.text.badge.plus")
-                                                        .resizable()
-                                                        .frame(width: 30.0, height: 27.0)
-                                            }
-                                        })
+                                        VStack {
+                                            Spacer()
+                                            Image(systemName: "note.text.badge.plus")
+                                                .resizable()
+                                                .frame(width: 30.0, height: 27.0)
+                                        }
+                                    })
                                 }
                             }
                         }
@@ -289,6 +340,7 @@ struct MainBoardsView: View {
     
 }
 
+// MARK: Add Boards View
 struct AddBoardView: View {
     @Environment(\.presentationMode) var mode: Binding<PresentationMode>
     
@@ -399,6 +451,8 @@ struct AddBoardView: View {
     }
 }
 
+
+// MARK: Profile View
 struct ProfileView: View {
     
     var accessToken: String
@@ -486,6 +540,7 @@ struct ProfileView: View {
     }
 }
 
+// MARK: SpecificProfileView
 struct SpecificProfileView: View {
     
     var accessToken: String
@@ -500,64 +555,64 @@ struct SpecificProfileView: View {
     
     
     var body: some View {
-
-            VStack{
-                Text("\(fetchSpecificProfile.name)").font(.largeTitle).bold()
-                Divider()
-                Text("Top Boards").font(.system(size: 23)).padding(.top, 30)
-                VStack (alignment: .leading) {
-                    ForEach(fetchSpecificProfile.favourite_boards, id: \.self) { board in
+        
+        VStack{
+            Text("\(fetchSpecificProfile.name)").font(.largeTitle).bold()
+            Divider()
+            Text("Top Boards").font(.system(size: 23)).padding(.top, 30)
+            VStack (alignment: .leading) {
+                ForEach(fetchSpecificProfile.favourite_boards, id: \.self) { board in
+                    HStack {
                         HStack {
-                            HStack {
-                                Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                                VStack (alignment: .leading) {
-                                    Text(board.board_name)
-                                    Text("#\(board.rank) of \(board.users_count)")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(.gray)
-                                }
-                            }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
-                            Spacer()
-                            HStack {
-                                VStack (alignment: .trailing) {
-                                    Text(String(format: "%.1f", board.rating))
-                                    Text("\(board.wins)W / \(board.losses)L")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(.gray)
-                                }
-                            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
-                        }
-                        Divider()
-                    }
-                }.padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
-                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-                Spacer()
-                
-                VStack {
-                    Divider()
-                    NavigationLink(destination: SpecificProfileBoards(accessToken: accessToken, userID: userID)) {
+                            Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: board.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                            VStack (alignment: .leading) {
+                                Text(board.board_name)
+                                Text("#\(board.rank) of \(board.users_count)")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.gray)
+                            }
+                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                        Spacer()
                         HStack {
-                            Text("Boards").foregroundColor(Color(UIColor.label))
-                            Spacer()
-                            Text("\(fetchSpecificProfile.board_count)").foregroundColor(Color(UIColor.label))
-                            Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
-                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
-                    }
-                    Divider()
-                    NavigationLink(destination: SpecificProfileActivity(accessToken: accessToken, userID: self.userID)) {
-                        HStack {
-                            Text("Activity").foregroundColor(Color(UIColor.label))
-                            Spacer()
-                            Text("\(fetchSpecificProfile.matches_count)").foregroundColor(Color(UIColor.label))
-                            Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
-                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                            VStack (alignment: .trailing) {
+                                Text(String(format: "%.1f", board.rating))
+                                Text("\(board.wins)W / \(board.losses)L")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.gray)
+                            }
+                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
                     }
                     Divider()
                 }
-            }.padding(.top, 20)
-            .onAppear {
-                self.fetchSpecificProfile.fetchSpecificProfile()
+            }.padding(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+            Spacer()
+            
+            VStack {
+                Divider()
+                NavigationLink(destination: SpecificProfileBoards(accessToken: accessToken, userID: userID)) {
+                    HStack {
+                        Text("Boards").foregroundColor(Color(UIColor.label))
+                        Spacer()
+                        Text("\(fetchSpecificProfile.board_count)").foregroundColor(Color(UIColor.label))
+                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                    }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                }
+                Divider()
+                NavigationLink(destination: SpecificProfileActivity(accessToken: accessToken, userID: self.userID)) {
+                    HStack {
+                        Text("Activity").foregroundColor(Color(UIColor.label))
+                        Spacer()
+                        Text("\(fetchSpecificProfile.matches_count)").foregroundColor(Color(UIColor.label))
+                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                    }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                }
+                Divider()
             }
+        }.padding(.top, 20)
+        .onAppear {
+            self.fetchSpecificProfile.fetchSpecificProfile()
+        }
     }
     
     func getIconColor(iconInt: Int) -> Color {
@@ -574,6 +629,7 @@ struct SpecificProfileView: View {
     }
 }
 
+// MARK: Profile Boards View
 struct ProfileBoards: View {
     
     var accessToken: String
@@ -633,6 +689,7 @@ struct ProfileBoards: View {
     }
 }
 
+// MARK: Specific Profile Boards View
 struct SpecificProfileBoards: View {
     
     var accessToken: String
@@ -694,7 +751,7 @@ struct SpecificProfileBoards: View {
     }
 }
 
-
+// MARK: Profile Activity View
 struct ProfileActivity: View {
     
     var accessToken: String
@@ -733,7 +790,7 @@ struct ProfileActivity: View {
                                             .font(.system(size: 15))
                                             .foregroundColor(.gray)
                                     }
-                                        
+                                    
                                 }
                             }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
                         }.frame(height: 55)
@@ -746,7 +803,7 @@ struct ProfileActivity: View {
     }
 }
 
-
+// MARK: Specific Profile Activity View
 struct SpecificProfileActivity: View {
     
     var accessToken: String
@@ -787,7 +844,7 @@ struct SpecificProfileActivity: View {
                                             .font(.system(size: 15))
                                             .foregroundColor(.gray)
                                     }
-                                        
+                                    
                                 }
                             }.padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 20))
                         }.frame(height: 55)
@@ -800,6 +857,7 @@ struct SpecificProfileActivity: View {
     }
 }
 
+// MARK: Boards Activity View
 struct BoardActivity: View {
     
     var accessToken: String
@@ -847,6 +905,7 @@ struct BoardActivity: View {
     }
 }
 
+// MARK: Board Details
 struct BoardDetails: View {
     
     var accessToken: String
@@ -955,13 +1014,13 @@ struct BoardDetails: View {
                 // Spacer()
                 if !fetchBoardDetails.is_member && fetchBoardDetails.is_public {
                     Image(systemName: "plus.square.fill")
-                            .resizable()
-                            .frame(width: 32.0, height: 32.0)
+                        .resizable()
+                        .frame(width: 32.0, height: 32.0)
                 }
                 else if fetchBoardDetails.is_member && !fetchBoardDetails.is_admin {
                     Image(systemName: "minus.square.fill")
-                            .resizable()
-                            .frame(width: 32.0, height: 32.0)
+                        .resizable()
+                        .frame(width: 32.0, height: 32.0)
                 }
             }
         })
@@ -1073,6 +1132,7 @@ struct BoardDetails: View {
     }
 }
 
+// MARK: Board Members View
 struct BoardMembersView: View {
     
     @State var selectedTag: String?
@@ -1136,8 +1196,8 @@ struct BoardMembersView: View {
                 VStack {
                     Spacer()
                     Image(systemName: "person.fill.badge.plus")
-                            .resizable()
-                            .frame(width: 32.0, height: 32.0)
+                        .resizable()
+                        .frame(width: 32.0, height: 32.0)
                 }
             }
         })
@@ -1158,6 +1218,7 @@ struct BoardMembersView: View {
     
 }
 
+// MARK: Submit Match View
 struct SubmitMatchView: View {
     
     @EnvironmentObject var userData: UserData
@@ -1243,35 +1304,35 @@ struct SubmitMatchView: View {
                         VStack (alignment: .leading) {
                             ForEach(self.fetchBoardMembers.boardMembers, id: \.self) { opponent in
                                 if opponent.user_id != userData.userId {
+                                    HStack {
                                         HStack {
-                                            HStack {
-                                                Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: opponent.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                                                VStack (alignment: .leading) {
-                                                    Text(opponent.name)
-                                                    Text("#\(opponent.rank)")
-                                                        .font(.system(size: 15))
-                                                        .foregroundColor(.gray)
-                                                }
-                                            }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
-                                            Spacer()
-                                            HStack {
-                                                VStack (alignment: .trailing) {
-                                                    Text("\(opponent.rating, specifier: "%.0f")")
-                                                    Text("\(opponent.wins)W / \(opponent.losses)L")
-                                                        .font(.system(size: 15))
-                                                        .foregroundColor(.gray)
-                                                }
-                                            }.padding(EdgeInsets(top: 10, leading: 0, bottom: 5, trailing: 20))
-                                        }
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            self.opponentExpansion = !self.opponentExpansion
-                                            self.selectedOpponent = opponent
-                                        }
+                                            Image(systemName: "seal.fill").foregroundColor(getIconColor(iconInt: opponent.rank_icon)).padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                                            VStack (alignment: .leading) {
+                                                Text(opponent.name)
+                                                Text("#\(opponent.rank)")
+                                                    .font(.system(size: 15))
+                                                    .foregroundColor(.gray)
+                                            }
+                                        }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                        Spacer()
+                                        HStack {
+                                            VStack (alignment: .trailing) {
+                                                Text("\(opponent.rating, specifier: "%.0f")")
+                                                Text("\(opponent.wins)W / \(opponent.losses)L")
+                                                    .font(.system(size: 15))
+                                                    .foregroundColor(.gray)
+                                            }
+                                        }.padding(EdgeInsets(top: 10, leading: 0, bottom: 5, trailing: 20))
+                                    }
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        self.opponentExpansion = !self.opponentExpansion
+                                        self.selectedOpponent = opponent
                                     }
                                 }
                             }
                         }
+                    }
                     HStack {
                         Text("Result")
                         Spacer()
@@ -1283,55 +1344,54 @@ struct SubmitMatchView: View {
                         self.boardExpansion = false
                         self.opponentExpansion = false
                     }; if (self.resultExpansion && self.selectedOpponent.name != "") {
-                            VStack (alignment: .center) {
-                                HStack {
-                                    VStack {
-                                        Image(systemName: "hand.thumbsup.fill").foregroundColor((self.selectedResult == "Win" || self.selectedResult == "" ? thumbsUp : .gray))
-                                            .font(.system(size: 100))
-                                        Text("Win")
-                                    }.onTapGesture {
-                                        self.selectedResult = "Win"
-                                    }
-                                    .padding(EdgeInsets(top: 20, leading: 20, bottom: 0, trailing: 0))
-                                    Spacer()
-                                    VStack {
-                                        Image(systemName: "hand.thumbsdown.fill").foregroundColor((self.selectedResult == "Loss" || self.selectedResult == "" ? thumbsDown : .gray))
-                                            .font(.system(size: 100))
-                                        Text("Loss")
-                                    }.onTapGesture {
-                                        self.selectedResult = "Loss"
-                                    }.padding(EdgeInsets(top: 20, leading: 0, bottom: 0, trailing: 20))
-                                }
+                        VStack (alignment: .center) {
+                            HStack {
                                 VStack {
-                                    Image(systemName: "hands.clap.fill").foregroundColor((self.selectedResult == "Draw" || self.selectedResult == "" ? tie : .gray))
+                                    Image(systemName: "hand.thumbsup.fill").foregroundColor((self.selectedResult == "Win" || self.selectedResult == "" ? thumbsUp : .gray))
                                         .font(.system(size: 100))
-                                    Text("Draw")
+                                    Text("Win")
                                 }.onTapGesture {
-                                    self.selectedResult = "Draw"
-                                }.padding(EdgeInsets(top: 20, leading: 0, bottom: 20, trailing: 0))
-                                Button(action: trySubmitMatch) {
-                                    HStack(alignment: .center) {
-                                        Spacer()
-                                        Text("Submit Match").foregroundColor(btnColor).bold()
-                                        Spacer()
-                                    }
-                                }.padding()
-                                .background(bgColor)
-                                .cornerRadius(20.0)
-                                .buttonStyle(PlainButtonStyle())
-                            }.padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
-                        }
-                    }.navigationBarTitle(Text("Submit Match"), displayMode: .inline)
-                    Spacer()
-                        .alert(isPresented:$showingPopup) {
-                            Alert(title: Text(self.popupMessage), message: Text(""), dismissButton: .default(Text("OK")) {
-                                self.popupMessage = ""
-                                self.showingPopup = false
-                            })
-                        }
-                }.navigationBarTitle(Text("Search"), displayMode: .inline)
-                .navigationBarHidden(true)
+                                    self.selectedResult = "Win"
+                                }
+                                .padding(EdgeInsets(top: 20, leading: 20, bottom: 0, trailing: 0))
+                                Spacer()
+                                VStack {
+                                    Image(systemName: "hand.thumbsdown.fill").foregroundColor((self.selectedResult == "Loss" || self.selectedResult == "" ? thumbsDown : .gray))
+                                        .font(.system(size: 100))
+                                    Text("Loss")
+                                }.onTapGesture {
+                                    self.selectedResult = "Loss"
+                                }.padding(EdgeInsets(top: 20, leading: 0, bottom: 0, trailing: 20))
+                            }
+                            VStack {
+                                Image(systemName: "hands.clap.fill").foregroundColor((self.selectedResult == "Draw" || self.selectedResult == "" ? tie : .gray))
+                                    .font(.system(size: 100))
+                                Text("Draw")
+                            }.onTapGesture {
+                                self.selectedResult = "Draw"
+                            }.padding(EdgeInsets(top: 20, leading: 0, bottom: 20, trailing: 0))
+                            Button(action: trySubmitMatch) {
+                                HStack(alignment: .center) {
+                                    Spacer()
+                                    Text("Submit Match").foregroundColor(btnColor).bold()
+                                    Spacer()
+                                }
+                            }.padding()
+                            .background(bgColor)
+                            .cornerRadius(20.0)
+                            .buttonStyle(PlainButtonStyle())
+                        }.padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                    }
+                }.navigationBarTitle(Text("Submit Match"), displayMode: .inline)
+                Spacer()
+                    .alert(isPresented:$showingPopup) {
+                        Alert(title: Text(self.popupMessage), message: Text(""), dismissButton: .default(Text("OK")) {
+                            self.popupMessage = ""
+                            self.showingPopup = false
+                        })
+                    }
             }
+        }
         .listStyle(GroupedListStyle())
         .onAppear{
             self.fetchBoards.fetchBoards(accessToken: self.accessToken)
@@ -1432,8 +1492,10 @@ struct SubmitMatchView: View {
     
 }
 
+
+// MARK: Add Members View
 struct AddMemberView: View {
-   
+    
     
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
@@ -1451,17 +1513,17 @@ struct AddMemberView: View {
         self.fetchUsersToAdd = FetchUsersToAdd(accessToken: accessToken, boardID: boardID)
     }
     
-        
+    
     var body: some View {
         VStack{
             TextField("Search...", text: self.$searchTerm, onCommit: {
                 fetchUsersToAdd.searchUsersToAdd(searchTerm: searchTerm)
             })
             .padding()
-                .foregroundColor(Color.black)
-                .background(Color.init(UIColor.systemGray6))
-                .cornerRadius(20.0)
-                .padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
+            .foregroundColor(Color.black)
+            .background(Color.init(UIColor.systemGray6))
+            .cornerRadius(20.0)
+            .padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
             ScrollView {
                 VStack (alignment: .leading) {
                     ForEach(fetchUsersToAdd.userResults, id: \.self) { user in
@@ -1479,7 +1541,7 @@ struct AddMemberView: View {
                                             .foregroundColor(.gray)
                                     }
                                     
-                                        
+                                    
                                 }
                             }.padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 0))
                             Spacer()
@@ -1489,10 +1551,10 @@ struct AddMemberView: View {
                                     userToAdd = user
                                 }, label: {
                                     Text("+")
-                                    .font(.system(.largeTitle))
+                                        .font(.system(.largeTitle))
                                         .frame(width: 32, height: 24.5)
-                                    .foregroundColor(Color.white)
-                                    .padding(.bottom, 7)
+                                        .foregroundColor(Color.white)
+                                        .padding(.bottom, 7)
                                 })
                                 .background(bgColor)
                                 .cornerRadius(38.5)
@@ -1506,10 +1568,10 @@ struct AddMemberView: View {
                         Divider()
                             .alert(isPresented:$showingConfirmation) {
                                 Alert(title: Text("Invite \(userToAdd.name) to board?"), message: Text(""), primaryButton: .default(Text("Invite")) {
-                                            inviteMember(user: userToAdd)
-                                            fetchUsersToAdd.removeUser(user: userToAdd)
-                                        }, secondaryButton: .cancel())
-                                    }
+                                    inviteMember(user: userToAdd)
+                                    fetchUsersToAdd.removeUser(user: userToAdd)
+                                }, secondaryButton: .cancel())
+                            }
                     }
                 }
             }
@@ -1521,7 +1583,7 @@ struct AddMemberView: View {
             confirmationMessage = ""
             showingConfirmation = false
         }
-       
+        
     }
     
     func inviteMember(user: Users) {
@@ -1566,6 +1628,7 @@ struct AddMemberView: View {
 
 
 
+// MARK: Search View
 struct SearchView: View {
     
     var accessToken: String
@@ -1588,10 +1651,10 @@ struct SearchView: View {
                     fetchUsers.searchUsers(searchTerm: searchTerm)
                     fetchAllBoards.searchBoards(searchTerm: searchTerm)
                 })
-                    .padding()
-                    .foregroundColor(Color.black)
-                    .background(Color.init(UIColor.systemGray6))
-                    .cornerRadius(20.0)
+                .padding()
+                .foregroundColor(Color.black)
+                .background(Color.init(UIColor.systemGray6))
+                .cornerRadius(20.0)
                 Picker(selection: $menuIndex, label: Text("Search Type")) {
                     Text("Boards").tag(0)
                     Text("Users").tag(1)
@@ -1616,7 +1679,7 @@ struct SearchView: View {
                                                         .foregroundColor(.gray)
                                                 }
                                                 
-                                                    
+                                                
                                             }
                                         }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
                                         Spacer()
@@ -1650,20 +1713,20 @@ struct SearchView: View {
                                                         .foregroundColor(.gray)
                                                 }
                                                 
-                                                    
+                                                
                                             }
                                         }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
                                         Spacer()
                                         HStack {
                                             Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                                         }
-                                        }.padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 20))
-                                    }
-                                Divider()
-                                    
+                                    }.padding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 20))
                                 }
-                            
+                                Divider()
+                                
                             }
+                            
+                        }
                     }
                 }
             }.navigationBarTitle(Text("Search"), displayMode: .inline)
@@ -1690,17 +1753,305 @@ struct SearchView: View {
     
 }
 
+
 struct BoardActivityView: View {
     var body: some View {
         Text("Board Activity")
     }
 }
 
+// MARK: Notifications View
 struct NotificationsView: View {
+    var accessToken: String
+    @State var showRecievedInviteView = false
+    @State private var searchTerm: String = ""
+    @State private var menuIndex: Int = 0
+    @State private var menuIndex2: Int = 0
+    @State private var menuIndex3: Int = 0
+    @State private var navigateTo: String? = nil
+    
+    @State var inviteToRemove = IncomingInviteModel()
+    
+    @ObservedObject var fetchOutgoingInvites: FetchOutgoingInvites
+    @ObservedObject var fetchOutgoingMatches: FetchOutgoingMatches
+    @ObservedObject var fetchIncomingInvites: FetchIncomingInvites
+    @ObservedObject var fetchIncomingMatches: FetchIncomingMatches
+    
+    init(accessToken: String) {
+        self.accessToken = accessToken
+        self.fetchOutgoingInvites = FetchOutgoingInvites(accessToken: accessToken)
+        self.fetchIncomingInvites = FetchIncomingInvites(accessToken: accessToken)
+        self.fetchOutgoingMatches = FetchOutgoingMatches(accessToken: accessToken)
+        self.fetchIncomingMatches = FetchIncomingMatches(accessToken: accessToken)
+    }
+    
     var body: some View {
-        Text("Notifications Screen")
+        NavigationView {
+            VStack {
+                Picker(selection: $menuIndex, label: Text("Search Type")) {
+                    Image(systemName: "tray.and.arrow.down.fill").tag(0)
+                    Image(systemName: "tray.and.arrow.up.fill").tag(1)
+                }.pickerStyle(SegmentedPickerStyle())
+                .navigationBarTitle(Text("Notifications"), displayMode: .inline)
+                if (menuIndex == 0) {
+                    ScrollView {
+                        VStack {
+                            Picker(selection: $menuIndex2, label: Text("Search Type")) {
+                                Text("Recieved Invites").tag(0)
+                                Text("Recieved Matches").tag(1)
+                            }.pickerStyle(SegmentedPickerStyle())
+                            if (menuIndex2 == 0) {
+                                ScrollView {
+                                    VStack (alignment: .leading) {
+                                        ForEach(fetchIncomingInvites.incomingInvites, id: \.self) { invite in
+                                            HStack {
+                                                NavigationLink(destination: RecievedInviteView(accessToken: accessToken, inviteID: invite.invite_id, inviteToRemove: invite)) {
+                                                    
+                                                    HStack {
+                                                        VStack (alignment: .leading) {
+                                                            Text("\(invite.from_name)").bold() + Text(" invited you to a board")
+                                                                .foregroundColor(Color(UIColor.label))
+                                                            
+                                                            
+                                                        }
+                                                    }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                                    Spacer()
+                                                    HStack {
+                                                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                                                        
+                                                    }
+                                                    
+                                                }.simultaneousGesture(TapGesture().onEnded{
+                                                    inviteToRemove = invite
+                                                })
+                                                Divider()
+                                                
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else {
+                                ScrollView {
+                                    VStack (alignment: .leading) {
+                                        ForEach(fetchIncomingMatches.incomingMatches, id: \.self) { match in
+                                            HStack {
+                                                //NavigationLink(destination: EmptyView()) {
+                                                HStack {
+                                                    VStack (alignment: .leading) {
+                                                        Text("\(match.from_name)").bold() + Text(" submitted a match")
+                                                            .foregroundColor(Color(UIColor.label))
+                                                        
+                                                        
+                                                    }
+                                                }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                                Spacer()
+                                                HStack {
+                                                    Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                                                }
+                                                //}
+                                            }
+                                            Divider()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else {
+                    ScrollView {
+                        VStack {
+                            Picker(selection: $menuIndex3, label: Text("Search Type")) {
+                                Text("Sent Invites").tag(0)
+                                Text("Sent Matches").tag(1)
+                            }.pickerStyle(SegmentedPickerStyle())
+                            if (menuIndex3 == 0) {
+                                ScrollView {
+                                    VStack (alignment: .leading) {
+                                        ForEach(fetchOutgoingInvites.outgoingInvites, id: \.self) { invite in
+                                            HStack {
+                                                //NavigationLink(destination: BoardDetails(accessToken: self.accessToken, boardId: board.id)) {
+                                                HStack {
+                                                    VStack (alignment: .leading) {
+                                                        Text("You invited ") + Text("\(invite.to_name)").bold() + Text(" to a board")
+                                                            .foregroundColor(Color(UIColor.label))
+                                                        
+                                                        
+                                                    }
+                                                }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                                Spacer()
+                                                HStack {
+                                                    Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                                                }
+                                                //}
+                                            }
+                                            Divider()
+                                        }
+                                    }
+                                }
+                            }
+                            else {
+                                ScrollView {
+                                    VStack (alignment: .leading) {
+                                        ForEach(fetchOutgoingMatches.outgoingMatches, id: \.self) { match in
+                                            HStack {
+                                                //NavigationLink(destination: BoardDetails(accessToken: self.accessToken, boardId: board.id)) {
+                                                HStack {
+                                                    VStack (alignment: .leading) {
+                                                        Text("Submitted match against ") + Text("\(match.to_name)").bold()
+                                                            .foregroundColor(Color(UIColor.label))
+                                                        
+                                                        
+                                                    }
+                                                }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                                Spacer()
+                                                HStack {
+                                                    Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
+                                                }
+                                                //}
+                                            }
+                                            Divider()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }.onAppear {
+                self.fetchOutgoingInvites.fetchOutInvites()
+                self.fetchOutgoingMatches.fetchOutMatches()
+                self.fetchIncomingInvites.fetchIncomingInvites()
+                self.fetchIncomingMatches.fetchIncomingMatches()
+            }
+        }
+        
+    }
+    
+    func getIconColor(iconInt: Int) -> Color {
+        switch iconInt {
+        case 1:
+            return platinum
+        case 2:
+            return gold
+        case 3:
+            return silver
+        default:
+            return bronze
+        }
     }
 }
+
+struct RecievedInviteView: View {
+    
+    @Environment(\.presentationMode) var mode: Binding<PresentationMode>
+    
+    var accessToken: String
+    var inviteID: Int
+    @ObservedObject var fetchIncomingInviteDetails: FetchIncomingInviteDetails
+    @ObservedObject var boardInviteResponseModel = BoardInviteResponseModel()
+    @ObservedObject var fetchIncomingInvites: FetchIncomingInvites
+    
+    init(accessToken: String, inviteID: Int, inviteToRemove: IncomingInviteModel) {
+        self.accessToken = accessToken
+        self.inviteID = inviteID
+        self.fetchIncomingInviteDetails = FetchIncomingInviteDetails(accessToken: accessToken, inviteID: inviteID)
+        self.fetchIncomingInvites = FetchIncomingInvites(accessToken: accessToken)
+    }
+    
+    var body: some View {
+        VStack(spacing: 10){
+            Spacer()
+            Text("\(fetchIncomingInviteDetails.from_name) invited you to")
+            Text("\(fetchIncomingInviteDetails.board_name)").font(.largeTitle).bold()
+            Spacer()
+            HStack{
+                Button(action: {
+                    self.acceptInvite(accepted: false)
+                    self.mode.wrappedValue.dismiss()
+                }) {
+                    HStack(alignment: .center) {
+                        Spacer()
+                        Text("Decline Invite").foregroundColor(btnColor).bold()
+                        Spacer()
+                    }
+                    .padding()
+                    .background(Color.red)
+                    .cornerRadius(20.0)
+                    .buttonStyle(PlainButtonStyle())
+                }
+                Spacer()
+                Button(action: {
+                    acceptInvite(accepted: true)
+                    self.mode.wrappedValue.dismiss()
+                    
+                }) {
+                    HStack(alignment: .center) {
+                        Spacer()
+                        Text("Accept Invite").foregroundColor(btnColor).bold()
+                        Spacer()
+                    }
+                }.padding()
+                .background(bgColor)
+                .cornerRadius(20.0)
+                .buttonStyle(PlainButtonStyle())
+            }.padding()
+            Spacer()
+        }.onAppear {
+            self.fetchIncomingInviteDetails.fetchIncomingInviteDetails(accessToken: self.accessToken, inviteID: self.inviteID)
+        }
+    }
+    func acceptInvite(accepted: Bool) -> Bool {
+        print(accepted, self.inviteID)
+        
+        self.boardInviteResponseModel.accept = accepted
+        self.boardInviteResponseModel.invite_id = self.inviteID
+        
+        struct AcceptInviteResponse: Decodable {
+            let success: Bool
+            let message: String
+        }
+        var success = false
+        let sem = DispatchSemaphore.init(value: 0)
+        
+        guard let encoded = try? JSONEncoder().encode(boardInviteResponseModel)
+        else {
+            print("Failed to encode creation of invite response request")
+            return false
+        }
+        
+        let url = URL(string: (apiURL + "/notification/invite"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "POST"
+        request.httpBody = encoded
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            defer { sem.signal() } // bad jank
+            guard let data = data else {
+                print("No data in response: \(error?.localizedDescription ?? "Unknown error").")
+                return
+            }
+            
+            if let acceptInviteResponse = try? JSONDecoder().decode(AcceptInviteResponse.self, from: data) {
+                print("Invite Responded to successfully!")
+                if (acceptInviteResponse.success) {
+                    success = true
+                }
+            } else {
+                print("Invalid response from server")
+                
+            }
+        }.resume()
+        sem.wait() // bad
+        
+        return success
+    }
+}
+
 
 struct ParentView_Previews: PreviewProvider {
     static var previews: some View {

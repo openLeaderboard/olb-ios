@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2C17B2422548800000E32111 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C17B2412548800000E32111 /* AuthViewModel.swift */; };
+		2C1890752578560E00BC114A /* BoardInviteResponseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1890742578560E00BC114A /* BoardInviteResponseModel.swift */; };
 		2C5FD07E25717F8B001104E8 /* AddMemberViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5FD07D25717F8B001104E8 /* AddMemberViewModel.swift */; };
 		2C7B158C253B596E00D09EF0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B158B253B596E00D09EF0 /* AppDelegate.swift */; };
 		2C7B158E253B596E00D09EF0 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7B158D253B596E00D09EF0 /* SceneDelegate.swift */; };
@@ -46,6 +47,7 @@
 
 /* Begin PBXFileReference section */
 		2C17B2412548800000E32111 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		2C1890742578560E00BC114A /* BoardInviteResponseModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardInviteResponseModel.swift; sourceTree = "<group>"; };
 		2C5FD07D25717F8B001104E8 /* AddMemberViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMemberViewModel.swift; sourceTree = "<group>"; };
 		2C7B1588253B596E00D09EF0 /* OpenLeaderboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenLeaderboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C7B158B253B596E00D09EF0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -178,6 +180,7 @@
 				661D72322573663F00C0BD16 /* JoinBoardViewModel.swift */,
 				661D7237257368A600C0BD16 /* RemoveFromBoardViewModel.swift */,
 				6643C8BE2574DC27001B287B /* SubmitMatchViewModel.swift */,
+				2C1890742578560E00BC114A /* BoardInviteResponseModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -325,6 +328,7 @@
 				2C17B2422548800000E32111 /* AuthViewModel.swift in Sources */,
 				F75964D2254E224E00E2D9D8 /* AddBoardViewModel.swift in Sources */,
 				661D7238257368A600C0BD16 /* RemoveFromBoardViewModel.swift in Sources */,
+				2C1890752578560E00BC114A /* BoardInviteResponseModel.swift in Sources */,
 				F7894D50254B97F7003D2462 /* LoginViewModel.swift in Sources */,
 				F7894D6B254BAD84003D2462 /* UserData.swift in Sources */,
 				2C7B158C253B596E00D09EF0 /* AppDelegate.swift in Sources */,

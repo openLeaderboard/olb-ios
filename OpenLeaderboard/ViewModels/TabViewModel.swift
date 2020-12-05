@@ -637,3 +637,213 @@ class FetchBoardDetails: ObservableObject {
     }
 }
 
+
+class FetchOutgoingInvites: ObservableObject {
+
+    @Published var outgoingInvites = [OutgoingInviteModel]()
+    
+    var accessToken: String
+    
+    init(accessToken: String) {
+        self.accessToken = accessToken
+    }
+    
+    public func fetchOutInvites() {
+        let url = URL(string: (apiURL + "/notification/outgoing/invites"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let outgoingInviteData = data {
+                    let decodedData = try JSONDecoder().decode(OutgoingInvites.self, from: outgoingInviteData)
+                    let decodedInvites = decodedData.invites
+                    
+                DispatchQueue.main.async {
+                    self.outgoingInvites = decodedInvites
+                }
+                } else {
+                    print("No activity data was returned!")
+                }
+            } catch {
+                print("There was an error getting activity data!")
+            }
+        }.resume()
+    }
+}
+
+class FetchIncomingInvites: ObservableObject {
+
+    @Published var incomingInvites = [IncomingInviteModel]()
+    
+    var accessToken: String
+    
+    init(accessToken: String) {
+        self.accessToken = accessToken
+    }
+    
+    public func fetchIncomingInvites() {
+        let url = URL(string: (apiURL + "/notification/incoming/invites"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let incomingInviteData = data {
+                    let decodedData = try JSONDecoder().decode(IncomingInvites.self, from: incomingInviteData)
+                    let decodedInvites = decodedData.invites
+                    
+                DispatchQueue.main.async {
+                    self.incomingInvites = decodedInvites
+                }
+                } else {
+                    print("No activity data was returned!")
+                }
+            } catch {
+                print("There was an error getting activity data!")
+            }
+        }.resume()
+    }
+    
+    public func removeInvite(invite: IncomingInviteModel) {
+        guard let index = incomingInvites.firstIndex(of: invite) else {return}
+        incomingInvites.remove(at: index)
+    }
+}
+
+
+class FetchIncomingInviteDetails: ObservableObject {
+
+    @Published var board_id: Int = 0
+    @Published var board_name : String = ""
+    @Published var is_public : Bool = true
+    @Published var member_count : Int = 0
+    @Published var from_id : Int = 0
+    @Published var from_name : String = ""
+    @Published var to_id : Int = 0
+    @Published var to_name : String = ""
+    @Published var invite_id : Int = 0
+    
+    var accessToken: String
+    var inviteID: Int
+    
+    init(accessToken: String, inviteID: Int) {
+        self.accessToken = accessToken
+        self.inviteID = inviteID
+    }
+    
+    public func fetchIncomingInviteDetails(accessToken: String, inviteID: Int) {
+        self.accessToken = accessToken
+        self.inviteID = inviteID
+        let url = URL(string: (apiURL + "/notification/invite/\(self.inviteID)"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let incomingInviteDetailsData = data {
+                    let decodedData = try JSONDecoder().decode(IncomingInviteDetailsModel.self, from: incomingInviteDetailsData)
+                    
+                DispatchQueue.main.async {
+                    self.board_id = decodedData.board_id
+                    self.board_name = decodedData.board_name
+                    self.is_public = decodedData.is_public
+                    self.member_count = decodedData.member_count
+                    self.from_id = decodedData.from_id
+                    self.from_name = decodedData.from_name
+                    self.to_id = decodedData.to_id
+                    self.to_name = decodedData.to_name
+                    self.invite_id = decodedData.invite_id
+                }
+                } else {
+                    print("No Board Invite data was returned!")
+                }
+            } catch {
+                print("There was an error getting board invite data!")
+            }
+        }.resume()
+    }
+}
+
+class FetchOutgoingMatches: ObservableObject {
+
+    @Published var outgoingMatches = [OutgoingMatchModel]()
+    
+    var accessToken: String
+    
+    init(accessToken: String) {
+        self.accessToken = accessToken
+    }
+    
+    public func fetchOutMatches() {
+        let url = URL(string: (apiURL + "/notification/outgoing/submissions"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let outgoingMatchData = data {
+                    let decodedData = try JSONDecoder().decode(OutgoingMatches.self, from: outgoingMatchData)
+                    let decodedMatches = decodedData.matches
+                    
+                DispatchQueue.main.async {
+                    self.outgoingMatches = decodedMatches
+                }
+                } else {
+                    print("No activity data was returned!")
+                }
+            } catch {
+                print("There was an error getting activity data!")
+            }
+        }.resume()
+    }
+}
+
+class FetchIncomingMatches: ObservableObject {
+
+    @Published var incomingMatches = [IncomingMatchModel]()
+    
+    var accessToken: String
+    
+    init(accessToken: String) {
+        self.accessToken = accessToken
+    }
+    
+    public func fetchIncomingMatches() {
+        let url = URL(string: (apiURL + "/notification/incoming/submissions"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let incomingMatchData = data {
+                    let decodedData = try JSONDecoder().decode(IncomingMatches.self, from: incomingMatchData)
+                    let decodedMatches = decodedData.matches
+                    
+                DispatchQueue.main.async {
+                    self.incomingMatches = decodedMatches
+                }
+                } else {
+                    print("No activity data was returned!")
+                }
+            } catch {
+                print("There was an error getting activity data!")
+            }
+        }.resume()
+    }
+}
