@@ -847,3 +847,60 @@ class FetchIncomingMatches: ObservableObject {
         }.resume()
     }
 }
+
+class FetchMatchDetails: ObservableObject {
+
+    @Published var board_id: Int = 0
+    @Published var board_name : String = ""
+    @Published var result: String = ""
+    @Published var rating_change : Double = 0.0
+    @Published var from_id : Int = 0
+    @Published var from_name : String = ""
+    @Published var to_id : Int = 0
+    @Published var to_name : String = ""
+    @Published var match_id : Int = 0
+    
+    var accessToken: String
+    var matchId: Int
+    
+    init(accessToken: String, matchId: Int) {
+        self.accessToken = accessToken
+        self.matchId = matchId
+    }
+    
+    public func fetchMatchDetails(accessToken: String, matchId: Int) {
+        self.accessToken = accessToken
+        self.matchId = matchId
+        let url = URL(string: (apiURL + "/notification/submission/\(self.matchId)"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "GET"
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            do {
+                if let matchData = data {
+                    let decodedData = try JSONDecoder().decode(MatchDetailsModel.self, from: matchData)
+                    print()
+                DispatchQueue.main.async {
+                    self.board_id = decodedData.board_id
+                    self.board_name = decodedData.board_name
+                    self.result = decodedData.result
+                    self.rating_change = decodedData.rating_change
+                    self.from_id = decodedData.from_id
+                    self.from_name = decodedData.from_name
+                    self.to_id = decodedData.to_id
+                    self.to_name = decodedData.to_name
+                    self.match_id = decodedData.match_id
+                }
+                } else {
+                    print("No match data was returned!")
+                }
+            } catch {
+                print(error);
+                print("There was an error getting match data!")
+            }
+        }.resume()
+    }
+}

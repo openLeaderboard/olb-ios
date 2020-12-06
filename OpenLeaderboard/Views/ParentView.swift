@@ -130,6 +130,18 @@ struct IncomingInviteDetailsModel: Codable, Hashable {
     public var invite_id : Int = 0
 }
 
+struct MatchDetailsModel: Codable, Hashable {
+    public var board_id: Int = 0
+    public var board_name : String = ""
+    public var result: String = ""
+    public var rating_change: Double = 0.0
+    public var from_id : Int = 0
+    public var from_name : String = ""
+    public var to_id : Int = 0
+    public var to_name : String = ""
+    public var match_id : Int = 0
+}
+
 struct OutgoingInvites: Codable {
     let invites: [OutgoingInviteModel]
 }
@@ -157,8 +169,6 @@ struct OutgoingMatches: Codable {
 }
 
 // MARK: Tab View
-
-
 struct TabParent: View {
     
     @EnvironmentObject var userData: UserData
@@ -1806,7 +1816,7 @@ struct NotificationsView: View {
                                         ForEach(fetchIncomingInvites.incomingInvites, id: \.self) { invite in
                                             HStack {
                                                 NavigationLink(destination: RecievedInviteView(accessToken: accessToken, inviteID: invite.invite_id, inviteToRemove: invite)) {
-                                                    
+
                                                     HStack {
                                                         VStack (alignment: .leading) {
                                                             Text("\(invite.from_name)").bold() + Text(" invited you to a board")
@@ -1836,7 +1846,7 @@ struct NotificationsView: View {
                                     VStack (alignment: .leading) {
                                         ForEach(fetchIncomingMatches.incomingMatches, id: \.self) { match in
                                             HStack {
-                                                //NavigationLink(destination: EmptyView()) {
+                                                NavigationLink(destination: ReceivedMatchView(accessToken: accessToken, matchID: match.match_id, matchToSubmit: match)) {
                                                 HStack {
                                                     VStack (alignment: .leading) {
                                                         Text("\(match.from_name)").bold() + Text(" submitted a match")
@@ -1849,7 +1859,7 @@ struct NotificationsView: View {
                                                 HStack {
                                                     Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                                                 }
-                                                //}
+                                                }
                                             }
                                             Divider()
                                         }
@@ -1871,20 +1881,20 @@ struct NotificationsView: View {
                                     VStack (alignment: .leading) {
                                         ForEach(fetchOutgoingInvites.outgoingInvites, id: \.self) { invite in
                                             HStack {
-                                                //NavigationLink(destination: BoardDetails(accessToken: self.accessToken, boardId: board.id)) {
-                                                HStack {
-                                                    VStack (alignment: .leading) {
-                                                        Text("You invited ") + Text("\(invite.to_name)").bold() + Text(" to a board")
-                                                            .foregroundColor(Color(UIColor.label))
-                                                        
-                                                        
+                                                NavigationLink(destination: CancelInviteView(accessToken: accessToken, inviteID: invite.invite_id, inviteToRemove: invite)) {
+                                                    HStack {
+                                                        VStack (alignment: .leading) {
+                                                            Text("You invited ") + Text("\(invite.to_name)").bold() + Text(" to a board")
+                                                                .foregroundColor(Color(UIColor.label))
+                                                            
+                                                            
+                                                        }
+                                                    }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                                    Spacer()
+                                                    HStack {
+                                                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                                                     }
-                                                }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
-                                                Spacer()
-                                                HStack {
-                                                    Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                                                 }
-                                                //}
                                             }
                                             Divider()
                                         }
@@ -1896,20 +1906,20 @@ struct NotificationsView: View {
                                     VStack (alignment: .leading) {
                                         ForEach(fetchOutgoingMatches.outgoingMatches, id: \.self) { match in
                                             HStack {
-                                                //NavigationLink(destination: BoardDetails(accessToken: self.accessToken, boardId: board.id)) {
-                                                HStack {
-                                                    VStack (alignment: .leading) {
-                                                        Text("Submitted match against ") + Text("\(match.to_name)").bold()
-                                                            .foregroundColor(Color(UIColor.label))
-                                                        
-                                                        
+                                                NavigationLink(destination: CancelMatchView(accessToken: accessToken, matchID: match.match_id, match: match)) {
+                                                    HStack {
+                                                        VStack (alignment: .leading) {
+                                                            Text("Submitted match against ") + Text("\(match.to_name)").bold()
+                                                                .foregroundColor(Color(UIColor.label))
+                                                            
+                                                            
+                                                        }
+                                                    }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                                                    Spacer()
+                                                    HStack {
+                                                        Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                                                     }
-                                                }.padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
-                                                Spacer()
-                                                HStack {
-                                                    Image(systemName: "chevron.right").padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 20)).foregroundColor(.gray)
                                                 }
-                                                //}
                                             }
                                             Divider()
                                         }
@@ -2051,6 +2061,318 @@ struct RecievedInviteView: View {
         return success
     }
 }
+
+struct CancelInviteView: View {
+    
+    @Environment(\.presentationMode) var mode: Binding<PresentationMode>
+    
+    var accessToken: String
+    var inviteID: Int
+    @ObservedObject var fetchOutgoingInviteDetails: FetchIncomingInviteDetails
+    @ObservedObject var boardInviteResponseModel = BoardInviteResponseModel()
+    @ObservedObject var fetchOutgoingInvites: FetchOutgoingInvites
+    
+    init(accessToken: String, inviteID: Int, inviteToRemove: OutgoingInviteModel) {
+        self.accessToken = accessToken
+        self.inviteID = inviteID
+        self.fetchOutgoingInviteDetails = FetchIncomingInviteDetails(accessToken: accessToken, inviteID: inviteID)
+        self.fetchOutgoingInvites = FetchOutgoingInvites(accessToken: accessToken)
+    }
+    
+    var body: some View {
+        VStack(spacing: 10){
+            Spacer()
+            Text("You invited \(fetchOutgoingInviteDetails.to_name) to")
+            Text("\(fetchOutgoingInviteDetails.board_name)").font(.largeTitle).bold()
+            Spacer()
+            HStack{
+                Button(action: {
+                    self.cancelInvite(accepted: false)
+                    self.mode.wrappedValue.dismiss()
+                }) {
+                    HStack(alignment: .center) {
+                        Spacer()
+                        Text("Cancel Invite").foregroundColor(btnColor).bold()
+                        Spacer()
+                    }
+                    .padding()
+                    .background(Color.red)
+                    .cornerRadius(20.0)
+                    .buttonStyle(PlainButtonStyle())
+                }
+                Spacer()
+            }.padding()
+            Spacer()
+        }.onAppear {
+            self.fetchOutgoingInviteDetails.fetchIncomingInviteDetails(accessToken: self.accessToken, inviteID: self.inviteID)
+        }
+    }
+    
+    func cancelInvite(accepted: Bool) -> Bool {
+        print(accepted, self.inviteID)
+        
+        self.boardInviteResponseModel.accept = false
+        self.boardInviteResponseModel.invite_id = self.inviteID
+        
+        struct CancelInviteResponse: Decodable {
+            let success: Bool
+            let message: String
+        }
+        var success = false
+        let sem = DispatchSemaphore.init(value: 0)
+        
+        guard let encoded = try? JSONEncoder().encode(boardInviteResponseModel)
+        else {
+            print("Failed to encode creation of invite response request")
+            return false
+        }
+        
+        let url = URL(string: (apiURL + "/notification/invite"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "POST"
+        request.httpBody = encoded
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            defer { sem.signal() } // bad jank
+            guard let data = data else {
+                print("No data in response: \(error?.localizedDescription ?? "Unknown error").")
+                return
+            }
+            
+            if let cancelInviteResponse = try? JSONDecoder().decode(CancelInviteResponse.self, from: data) {
+                print("Invite Responded to successfully!")
+                if (cancelInviteResponse.success) {
+                    success = true
+                }
+            } else {
+                print("Invalid response from server")
+                
+            }
+        }.resume()
+        sem.wait() // bad
+        
+        return success
+    }
+}
+
+struct ReceivedMatchView: View {
+    
+    @Environment(\.presentationMode) var mode: Binding<PresentationMode>
+    
+    var accessToken: String
+    var matchId: Int
+    @ObservedObject var fetchMatchDetails: FetchMatchDetails
+    @ObservedObject var matchSubmissionResponseModel = MatchSubmissionResponseModel()
+    
+    init(accessToken: String, matchID: Int, matchToSubmit: IncomingMatchModel) {
+        self.accessToken = accessToken
+        self.matchId = matchID
+        self.fetchMatchDetails = FetchMatchDetails(accessToken: accessToken, matchId: matchID)
+    }
+    
+    var body: some View {
+        VStack(spacing: 10) {
+            Spacer()
+            Text("\(fetchMatchDetails.from_name) submitted a match")
+            Text(getResult(result: fetchMatchDetails.result)).font(.largeTitle).bold()
+            Spacer()
+            HStack {
+                Button(action: {
+                    self.sendMatch(accepted: false)
+                    self.mode.wrappedValue.dismiss()
+                }) {
+                    HStack(alignment: .center) {
+                        Spacer()
+                        Text("Decline Result").foregroundColor(btnColor).bold()
+                        Spacer()
+                    }
+                    .padding()
+                    .background(Color.red)
+                    .cornerRadius(20.0)
+                    .buttonStyle(PlainButtonStyle())
+                }
+                Spacer()
+                Button(action: {
+                    sendMatch(accepted: true)
+                    self.mode.wrappedValue.dismiss()
+                    
+                }) {
+                    HStack(alignment: .center) {
+                        Spacer()
+                        Text("Accept Result").foregroundColor(btnColor).bold()
+                        Spacer()
+                    }
+                }.padding()
+                .background(bgColor)
+                .cornerRadius(20.0)
+                .buttonStyle(PlainButtonStyle())
+            }.padding()
+            Spacer()
+        }.onAppear {
+            self.fetchMatchDetails.fetchMatchDetails(accessToken: self.accessToken, matchId: self.matchId)
+        }
+    }
+    
+    func sendMatch(accepted: Bool) -> Bool {
+        print(accepted, self.matchId)
+        
+        self.matchSubmissionResponseModel.accept = accepted
+        self.matchSubmissionResponseModel.match_id = self.matchId
+        
+        struct AcceptMatchResponse: Decodable {
+            let success: Bool
+            let message: String
+        }
+        var success = false
+        let sem = DispatchSemaphore.init(value: 0)
+        
+        guard let encoded = try? JSONEncoder().encode(matchSubmissionResponseModel)
+        else {
+            print("Failed to encode creation of invite response request")
+            return false
+        }
+        
+        let url = URL(string: (apiURL + "/notification/submission"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "POST"
+        request.httpBody = encoded
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            defer { sem.signal() } // bad jank
+            guard let data = data else {
+                print("No data in response: \(error?.localizedDescription ?? "Unknown error").")
+                return
+            }
+            
+            if let acceptMatchResponse = try? JSONDecoder().decode(AcceptMatchResponse.self, from: data) {
+                print("Invite Responded to successfully!")
+                if (acceptMatchResponse.success) {
+                    success = true
+                }
+            } else {
+                print("Invalid response from server")
+                
+            }
+        }.resume()
+        sem.wait() // bad
+        
+        return success
+    }
+    
+     func getResult(result: String) -> String {
+        if (result == "Loss") {
+            return "You Lost!"
+        } else if (result == "Win") {
+            return "You Won!"
+        } else {
+            return "You Tied!"
+        }
+     }
+        
+}
+
+struct CancelMatchView: View {
+    
+    @Environment(\.presentationMode) var mode: Binding<PresentationMode>
+    
+    var accessToken: String
+    var matchID: Int
+    var match: OutgoingMatchModel
+    @ObservedObject var fetchMatchDetails: FetchMatchDetails
+    @ObservedObject var matchSubmissionResponseModel = MatchSubmissionResponseModel()
+    
+    init(accessToken: String, matchID: Int, match: OutgoingMatchModel) {
+        self.accessToken = accessToken
+        self.matchID = matchID
+        self.match = match
+        self.fetchMatchDetails = FetchMatchDetails(accessToken: accessToken, matchId: matchID)
+    }
+    
+    var body: some View {
+        VStack(spacing: 10){
+            Spacer()
+            Text("You submitted a match to \(match.to_name)")
+            Spacer()
+            HStack{
+                Button(action: {
+                    self.cancelMatch(accepted: false)
+                    self.mode.wrappedValue.dismiss()
+                }) {
+                    HStack(alignment: .center) {
+                        Spacer()
+                        Text("Cancel Match").foregroundColor(btnColor).bold()
+                        Spacer()
+                    }
+                    .padding()
+                    .background(Color.red)
+                    .cornerRadius(20.0)
+                    .buttonStyle(PlainButtonStyle())
+                }
+                Spacer()
+            }.padding()
+            Spacer()
+        }.onAppear {
+            self.fetchMatchDetails.fetchMatchDetails(accessToken: self.accessToken, matchId: matchID)
+        }
+    }
+    
+    func cancelMatch(accepted: Bool) -> Bool {
+        
+        self.matchSubmissionResponseModel.accept = false
+        self.matchSubmissionResponseModel.match_id = self.matchID
+        
+        struct CancelInviteResponse: Decodable {
+            let success: Bool
+            let message: String
+        }
+        var success = false
+        let sem = DispatchSemaphore.init(value: 0)
+        
+        guard let encoded = try? JSONEncoder().encode(matchSubmissionResponseModel)
+        else {
+            print("Failed to encode creation of match response request")
+            return false
+        }
+        
+        let url = URL(string: (apiURL + "/notification/submission"))!
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
+        request.httpMethod = "POST"
+        request.httpBody = encoded
+        
+        URLSession.shared.dataTask(with: request) {
+            data, response, error in
+            defer { sem.signal() } // bad jank
+            guard let data = data else {
+                print("No data in response: \(error?.localizedDescription ?? "Unknown error").")
+                return
+            }
+            
+            if let cancelInviteResponse = try? JSONDecoder().decode(CancelInviteResponse.self, from: data) {
+                print("Invite Responded to successfully!")
+                if (cancelInviteResponse.success) {
+                    success = true
+                }
+            } else {
+                print("Invalid response from server")
+                
+            }
+        }.resume()
+        sem.wait() // bad
+        
+        return success
+    }
+}
+
+
+
 
 
 struct ParentView_Previews: PreviewProvider {
