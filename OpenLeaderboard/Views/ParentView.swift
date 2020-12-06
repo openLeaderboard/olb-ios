@@ -169,6 +169,8 @@ struct OutgoingMatches: Codable {
 }
 
 // MARK: Tab View
+
+
 struct TabParent: View {
     
     @EnvironmentObject var userData: UserData
@@ -1906,7 +1908,7 @@ struct NotificationsView: View {
                                     VStack (alignment: .leading) {
                                         ForEach(fetchOutgoingMatches.outgoingMatches, id: \.self) { match in
                                             HStack {
-                                                NavigationLink(destination: CancelMatchView(accessToken: accessToken, matchID: match.match_id, match: match)) {
+                                                NavigationLink(destination: CancelMatchView(accessToken: accessToken, matchID: match.match_id)) {
                                                     HStack {
                                                         VStack (alignment: .leading) {
                                                             Text("Submitted match against ") + Text("\(match.to_name)").bold()
@@ -2283,21 +2285,19 @@ struct CancelMatchView: View {
     
     var accessToken: String
     var matchID: Int
-    var match: OutgoingMatchModel
     @ObservedObject var fetchMatchDetails: FetchMatchDetails
     @ObservedObject var matchSubmissionResponseModel = MatchSubmissionResponseModel()
     
-    init(accessToken: String, matchID: Int, match: OutgoingMatchModel) {
+    init(accessToken: String, matchID: Int) {
         self.accessToken = accessToken
         self.matchID = matchID
-        self.match = match
         self.fetchMatchDetails = FetchMatchDetails(accessToken: accessToken, matchId: matchID)
     }
     
     var body: some View {
         VStack(spacing: 10){
             Spacer()
-            Text("You submitted a match to \(match.to_name)")
+            Text("You submitted a match from \(fetchMatchDetails.board_name) against \(fetchMatchDetails.to_name)").padding()
             Spacer()
             HStack{
                 Button(action: {

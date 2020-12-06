@@ -17,6 +17,7 @@ let jwt = ""
 
 struct LoginView: View {
     
+    @State private var loginError = false;
     @State var login_email: String = ""
     @State var login_pword: String = ""
     @ObservedObject var loginViewModel = LoginViewModel()
@@ -44,8 +45,12 @@ struct LoginView: View {
                                     .padding()
                                     .background(Color.white)
                                     .cornerRadius(20.0)
-                                    .padding(.bottom, 30)
                                 
+                                if (loginError) {
+                                    Text("Invalid Username or Password")
+                                        .foregroundColor(.yellow)
+                                }
+                                    
                                 Button(action: loginAction) {
                                     HStack(alignment: .center) {
                                         Spacer()
@@ -56,6 +61,7 @@ struct LoginView: View {
                                 .padding().background(btnColor)
                                 .cornerRadius(20.0)
                                 .buttonStyle(PlainButtonStyle())
+                                .padding(.top, 30)
                                 
                                 
                                 NavigationLink(destination: RegView(authViewModel: AuthViewModel())) {
@@ -104,11 +110,13 @@ struct LoginView: View {
 
             if let loginToken = try? JSONDecoder().decode(LoginToken.self, from: data) {
                 if (loginToken.success) {
+                    loginError = false
                     self.userData.loggedIn = true
                     self.userData.access_token = loginToken.access_token
                     self.userData.userId = loginToken.user_id
                 }
             } else {
+                loginError = true
                 print("Invalid response from server")
                 print(data, LoginToken.self)
             }
@@ -175,18 +183,20 @@ struct RegView: View {
                                 .padding().background(btnColor)
                                 .cornerRadius(20.0)
                                 .buttonStyle(PlainButtonStyle())
-                            }.navigationBarTitle(Text(""))
+                            }
+                            .navigationBarTitle(Text(""))
                         }
                         .padding()
                     }
                     .padding()
             ).alert(isPresented: $showingConfirmation) {
-                    Alert(title: Text("Registration Success!"), message: Text(confirmationMessage), dismissButton: .default(Text("OK")))
+                Alert(title: Text("Registration Success!"), message: Text(confirmationMessage), dismissButton: .default(Text("OK")))
             }
         }
     }
     
     func register() {
+        
         struct RegistrationToken: Decodable {
             let success: Bool
             let message: String
@@ -219,11 +229,6 @@ struct RegView: View {
                     self.userData.access_token = registrationToken.access_token
                     self.userData.userId = registrationToken.user_id
                 }
-//                self.confirmationMessage =
-//                    "User Created?: \(registrationToken.success)\n" +
-//                    "User Created Message: \(registrationToken.message)\n" +
-//                    "User Access Token (JWT): \(registrationToken.access_token)"
-//                self.showingConfirmation = true
             } else {
                 print("Invalid response from server")
             }
