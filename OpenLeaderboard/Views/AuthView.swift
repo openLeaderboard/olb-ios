@@ -57,10 +57,11 @@ struct LoginView: View {
                                         Text("Login").foregroundColor(bgColor).bold()
                                         Spacer()
                                     }
-                                }
+                                
                                 .padding().background(btnColor)
                                 .cornerRadius(20.0)
                                 .buttonStyle(PlainButtonStyle())
+                                }
                                 .padding(.top, 30)
                                 
                                 
@@ -179,10 +180,11 @@ struct RegView: View {
                                         Text("Register").foregroundColor(bgColor).bold()
                                         Spacer()
                                     }
-                                }
+                                
                                 .padding().background(btnColor)
                                 .cornerRadius(20.0)
                                 .buttonStyle(PlainButtonStyle())
+                                }
                             }
                             .navigationBarTitle(Text(""))
                         }

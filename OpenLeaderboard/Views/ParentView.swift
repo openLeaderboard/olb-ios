@@ -1388,10 +1388,11 @@ struct SubmitMatchView: View {
                                     Text("Submit Match").foregroundColor(btnColor).bold()
                                     Spacer()
                                 }
-                            }.padding()
+                            .padding()
                             .background(bgColor)
                             .cornerRadius(20.0)
                             .buttonStyle(PlainButtonStyle())
+                            }
                         }.padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
                     }
                 }.navigationBarTitle(Text("Submit Match"), displayMode: .inline)
@@ -2207,10 +2208,11 @@ struct ReceivedMatchView: View {
                         Text("Accept Result").foregroundColor(btnColor).bold()
                         Spacer()
                     }
-                }.padding()
+                .padding()
                 .background(bgColor)
                 .cornerRadius(20.0)
                 .buttonStyle(PlainButtonStyle())
+                }
             }.padding()
             Spacer()
         }.onAppear {
