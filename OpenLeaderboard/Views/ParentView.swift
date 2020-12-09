@@ -358,6 +358,9 @@ struct AddBoardView: View {
     
     var accessToken: String
     @ObservedObject var addBoardViewModel = AddBoardViewModel()
+    let boardNameCharacterLimit = 16;
+    @State private var message = ""
+    @State private var showingMessage = false
     
     init(accessToken: String) {
         self.accessToken = accessToken
@@ -411,8 +414,19 @@ struct AddBoardView: View {
             .padding().background(bgColor)
             .cornerRadius(20.0)
             .buttonStyle(PlainButtonStyle())
-        }.padding(30)
+            .alert(isPresented: $showingMessage) {
+                Alert(title: Text(message), message: Text(""), dismissButton: .default(Text("OK")) {
+                    self.showingMessage = false
+                    self.message = ""
+                })
+            }
+            }.padding(30).onAppear() {
+                self.showingMessage = false
+                self.message = ""
+            }
         .navigationBarTitle(Text("Create Board"), displayMode: .inline)
+        
+        
     }
     
     func addBoard() -> Bool {
@@ -422,8 +436,20 @@ struct AddBoardView: View {
             let message: String
             let board_id: Int
         }
+        
+        if self.addBoardViewModel.board_name == "" {
+            self.showingMessage = true
+            self.message = "Board name cannot be empty!"
+            return false
+        }
+        
+        if self.addBoardViewModel.board_name.count > boardNameCharacterLimit {
+            self.showingMessage = true
+            self.message = "Name cannot exceed \(boardNameCharacterLimit) characters"
+            return false
+        }
+        
         var success = false
-        let sem = DispatchSemaphore.init(value: 0)
         
         guard let encoded = try? JSONEncoder().encode(addBoardViewModel)
         else {
@@ -431,6 +457,7 @@ struct AddBoardView: View {
             return false
         }
         
+        let sem = DispatchSemaphore.init(value: 0)
         let url = URL(string: (apiURL + "/board/create"))!
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -450,10 +477,14 @@ struct AddBoardView: View {
                 print("Board created successfully!")
                 if (createBoardResponse.success) {
                     success = true
+                } else {
+                    self.message = createBoardResponse.message
+                    self.showingMessage = true
                 }
             } else {
                 print("Invalid response from server")
-                
+                self.message = "Invalid response from server"
+                self.showingMessage = true
             }
         }.resume()
         
@@ -1010,16 +1041,23 @@ struct BoardDetails: View {
                 if joinBoard() {
                     self.popupMessage = "Joined \(self.fetchBoardDetails.board_name)!"
                     self.showingPopup = true
+                    fetchBoardDetails.fetchBoardDetails(accessToken: self.accessToken, boardId: self.boardId)
+                } else {
+                    self.showingPopup = true
+                    // error set in joinBoard
                 }
-                fetchBoardDetails.fetchBoardDetails(accessToken: self.accessToken, boardId: self.boardId)
             }
             else if fetchBoardDetails.is_member && !fetchBoardDetails.is_admin {
                 // synchronous leave then reload
                 if leaveBoard() {
                     self.popupMessage = "Left \(self.fetchBoardDetails.board_name)!"
                     self.showingPopup = true
+                    fetchBoardDetails.fetchBoardDetails(accessToken: self.accessToken, boardId: self.boardId)
+                } else {
+                    self.showingPopup = true
+                    // error set in leaveBoard
                 }
-                fetchBoardDetails.fetchBoardDetails(accessToken: self.accessToken, boardId: self.boardId)
+                
             }
         }) {
             VStack {
@@ -1058,13 +1096,13 @@ struct BoardDetails: View {
             let message: String
         }
         var success = false
-        let sem = DispatchSemaphore.init(value: 0)
         
         guard let encoded = try? JSONEncoder().encode(joinBoardViewModel)
         else {
             print("Failed to encode creation of join board request")
             return false
         }
+        let sem = DispatchSemaphore.init(value: 0)
         
         let url = URL(string: (apiURL + "/board/join"))!
         var request = URLRequest(url: url)
@@ -1085,10 +1123,14 @@ struct BoardDetails: View {
                 print("Board joined successfully!")
                 if (joinBoardResponse.success) {
                     success = true
+                } else {
+                    success = false
+                    self.popupMessage = joinBoardResponse.message
                 }
             } else {
                 print("Invalid response from server")
-                
+                success = false
+                self.popupMessage = "Invalid response from server"
             }
         }.resume()
         
@@ -1104,13 +1146,13 @@ struct BoardDetails: View {
             let message: String
         }
         var success = false
-        let sem = DispatchSemaphore.init(value: 0)
         
         guard let encoded = try? JSONEncoder().encode(leaveBoardViewModel)
         else {
             print("Failed to encode creation of leave board request")
             return false
         }
+        let sem = DispatchSemaphore.init(value: 0)
         
         let url = URL(string: (apiURL + "/board/remove"))!
         var request = URLRequest(url: url)
@@ -1131,10 +1173,14 @@ struct BoardDetails: View {
                 print("Board left successfully!")
                 if (leaveBoardResponse.success) {
                     success = true
+                } else {
+                    success = false
+                    self.popupMessage = leaveBoardResponse.message
                 }
             } else {
                 print("Invalid response from server")
-                
+                success = false
+                self.popupMessage = "Invalid response from server"
             }
         }.resume()
         
@@ -1451,13 +1497,13 @@ struct SubmitMatchView: View {
             let message: String
         }
         var success = false
-        let sem = DispatchSemaphore.init(value: 0)
         
         guard let encoded = try? JSONEncoder().encode(submitMatchViewModel)
         else {
             print("Failed to encode creation of submit match request")
             return false
         }
+        let sem = DispatchSemaphore.init(value: 0)
         
         let url = URL(string: (apiURL + "/submit/"))!
         var request = URLRequest(url: url)
@@ -1478,10 +1524,16 @@ struct SubmitMatchView: View {
                 print("Match submitted successfully!")
                 if (submitMatchResponse.success) {
                     success = true
+                } else {
+                    success = false
+                    self.popupMessage = submitMatchResponse.message
+                    self.showingPopup = true
                 }
             } else {
                 print("Invalid response from server")
-                
+                self.popupMessage = "Invalid response from server"
+                self.showingPopup = true
+                success = false
             }
         }.resume()
         
@@ -1514,6 +1566,8 @@ struct AddMemberView: View {
     @State private var showingConfirmation = false
     @State var userToAdd = Users()
     @State var searchTerm = ""
+    @State var showingError = false
+    @State var errorMessage = ""
     
     var boardID: Int
     var accessToken: String
@@ -1585,16 +1639,25 @@ struct AddMemberView: View {
                                     fetchUsersToAdd.removeUser(user: userToAdd)
                                 }, secondaryButton: .cancel())
                             }
+
                     }
                 }
             }
             Spacer()
             Spacer()
+                .alert(isPresented:$showingError) {
+                    Alert(title: Text(errorMessage), message: Text(""), dismissButton: .default(Text("OK")) {
+                        self.errorMessage = ""
+                        self.showingError = false
+                    })
+                }
         }.navigationBarTitle(Text("Add Member"), displayMode: .inline).onAppear{
             fetchUsersToAdd.searchUsersToAdd(searchTerm: searchTerm)
         }.onDisappear{
             confirmationMessage = ""
             showingConfirmation = false
+            self.errorMessage = ""
+            self.showingError = false
         }
         
     }
@@ -1629,7 +1692,12 @@ struct AddMemberView: View {
             }
             
             if let createMemberResponse = try? JSONDecoder().decode(RegistrationToken.self, from: data) {
-                print("Member added successfully!")
+                if createMemberResponse.success {
+                        print("Member added successfully!")
+                } else {
+                    self.errorMessage = createMemberResponse.message
+                    self.showingError = true
+                }
             } else {
                 print("Invalid response from server")
             }
@@ -1965,6 +2033,8 @@ struct RecievedInviteView: View {
     @ObservedObject var fetchIncomingInviteDetails: FetchIncomingInviteDetails
     @ObservedObject var boardInviteResponseModel = BoardInviteResponseModel()
     @ObservedObject var fetchIncomingInvites: FetchIncomingInvites
+    @State private var message = ""
+    @State private var showingMessage = false
     
     init(accessToken: String, inviteID: Int, inviteToRemove: IncomingInviteModel) {
         self.accessToken = accessToken
@@ -1981,8 +2051,9 @@ struct RecievedInviteView: View {
             Spacer()
             HStack{
                 Button(action: {
-                    self.acceptInvite(accepted: false)
-                    self.mode.wrappedValue.dismiss()
+                    if self.acceptInvite(accepted: false) {
+                        self.mode.wrappedValue.dismiss()
+                    }
                 }) {
                     HStack(alignment: .center) {
                         Spacer()
@@ -1996,9 +2067,9 @@ struct RecievedInviteView: View {
                 }
                 Spacer()
                 Button(action: {
-                    acceptInvite(accepted: true)
-                    self.mode.wrappedValue.dismiss()
-                    
+                    if acceptInvite(accepted: true) {
+                        self.mode.wrappedValue.dismiss()
+                    }
                 }) {
                     HStack(alignment: .center) {
                         Spacer()
@@ -2011,10 +2082,19 @@ struct RecievedInviteView: View {
                 .buttonStyle(PlainButtonStyle())
             }.padding()
             Spacer()
+                .alert(isPresented: $showingMessage) {
+                    Alert(title: Text(message), message: Text(""), dismissButton: .default(Text("OK")) {
+                        self.showingMessage = false
+                        self.message = ""
+                    })
+                }
         }.onAppear {
             self.fetchIncomingInviteDetails.fetchIncomingInviteDetails(accessToken: self.accessToken, inviteID: self.inviteID)
+            self.showingMessage = false
+            self.message = ""
         }
     }
+    
     func acceptInvite(accepted: Bool) -> Bool {
         print(accepted, self.inviteID)
         
@@ -2026,13 +2106,13 @@ struct RecievedInviteView: View {
             let message: String
         }
         var success = false
-        let sem = DispatchSemaphore.init(value: 0)
         
         guard let encoded = try? JSONEncoder().encode(boardInviteResponseModel)
         else {
             print("Failed to encode creation of invite response request")
             return false
         }
+        let sem = DispatchSemaphore.init(value: 0)
         
         let url = URL(string: (apiURL + "/notification/invite"))!
         var request = URLRequest(url: url)
@@ -2053,10 +2133,14 @@ struct RecievedInviteView: View {
                 print("Invite Responded to successfully!")
                 if (acceptInviteResponse.success) {
                     success = true
+                } else {
+                    self.showingMessage = true
+                    self.message = acceptInviteResponse.message
                 }
             } else {
                 print("Invalid response from server")
-                
+                self.showingMessage = true
+                self.message = "Invalid response from server"
             }
         }.resume()
         sem.wait() // bad
@@ -2074,6 +2158,8 @@ struct CancelInviteView: View {
     @ObservedObject var fetchOutgoingInviteDetails: FetchIncomingInviteDetails
     @ObservedObject var boardInviteResponseModel = BoardInviteResponseModel()
     @ObservedObject var fetchOutgoingInvites: FetchOutgoingInvites
+    @State private var message = ""
+    @State private var showingMessage = false
     
     init(accessToken: String, inviteID: Int, inviteToRemove: OutgoingInviteModel) {
         self.accessToken = accessToken
@@ -2090,8 +2176,9 @@ struct CancelInviteView: View {
             Spacer()
             HStack{
                 Button(action: {
-                    self.cancelInvite(accepted: false)
-                    self.mode.wrappedValue.dismiss()
+                    if self.cancelInvite(accepted: false) {
+                        self.mode.wrappedValue.dismiss()
+                    }
                 }) {
                     HStack(alignment: .center) {
                         Spacer()
@@ -2106,8 +2193,16 @@ struct CancelInviteView: View {
                 Spacer()
             }.padding()
             Spacer()
+                .alert(isPresented: $showingMessage) {
+                    Alert(title: Text(message), message: Text(""), dismissButton: .default(Text("OK")) {
+                        self.showingMessage = false
+                        self.message = ""
+                    })
+                }
         }.onAppear {
             self.fetchOutgoingInviteDetails.fetchIncomingInviteDetails(accessToken: self.accessToken, inviteID: self.inviteID)
+            self.showingMessage = false
+            self.message = ""
         }
     }
     
@@ -2149,10 +2244,14 @@ struct CancelInviteView: View {
                 print("Invite Responded to successfully!")
                 if (cancelInviteResponse.success) {
                     success = true
+                } else {
+                    self.message = cancelInviteResponse.message
+                    self.showingMessage = true
                 }
             } else {
                 print("Invalid response from server")
-                
+                self.message = "Invalid response from server"
+                self.showingMessage = true
             }
         }.resume()
         sem.wait() // bad
@@ -2169,6 +2268,8 @@ struct ReceivedMatchView: View {
     var matchId: Int
     @ObservedObject var fetchMatchDetails: FetchMatchDetails
     @ObservedObject var matchSubmissionResponseModel = MatchSubmissionResponseModel()
+    @State private var message = ""
+    @State private var showingMessage = false
     
     init(accessToken: String, matchID: Int, matchToSubmit: IncomingMatchModel) {
         self.accessToken = accessToken
@@ -2184,8 +2285,9 @@ struct ReceivedMatchView: View {
             Spacer()
             HStack {
                 Button(action: {
-                    self.sendMatch(accepted: false)
-                    self.mode.wrappedValue.dismiss()
+                    if self.sendMatch(accepted: false) {
+                        self.mode.wrappedValue.dismiss()
+                    }
                 }) {
                     HStack(alignment: .center) {
                         Spacer()
@@ -2199,9 +2301,9 @@ struct ReceivedMatchView: View {
                 }
                 Spacer()
                 Button(action: {
-                    sendMatch(accepted: true)
-                    self.mode.wrappedValue.dismiss()
-                    
+                    if sendMatch(accepted: true) {
+                        self.mode.wrappedValue.dismiss()
+                    }
                 }) {
                     HStack(alignment: .center) {
                         Spacer()
@@ -2215,8 +2317,16 @@ struct ReceivedMatchView: View {
                 }
             }.padding()
             Spacer()
+                .alert(isPresented: $showingMessage) {
+                    Alert(title: Text(message), message: Text(""), dismissButton: .default(Text("OK")) {
+                        self.showingMessage = false
+                        self.message = ""
+                    })
+                }
         }.onAppear {
             self.fetchMatchDetails.fetchMatchDetails(accessToken: self.accessToken, matchId: self.matchId)
+            self.showingMessage = false
+            self.message = ""
         }
     }
     
@@ -2258,10 +2368,14 @@ struct ReceivedMatchView: View {
                 print("Invite Responded to successfully!")
                 if (acceptMatchResponse.success) {
                     success = true
+                } else {
+                    self.message = acceptMatchResponse.message
+                    self.showingMessage = true
                 }
             } else {
                 print("Invalid response from server")
-                
+                self.message = "Invalid response from server"
+                self.showingMessage = true
             }
         }.resume()
         sem.wait() // bad
@@ -2289,6 +2403,8 @@ struct CancelMatchView: View {
     var matchID: Int
     @ObservedObject var fetchMatchDetails: FetchMatchDetails
     @ObservedObject var matchSubmissionResponseModel = MatchSubmissionResponseModel()
+    @State private var message = ""
+    @State private var showingMessage = false
     
     init(accessToken: String, matchID: Int) {
         self.accessToken = accessToken
@@ -2303,8 +2419,9 @@ struct CancelMatchView: View {
             Spacer()
             HStack{
                 Button(action: {
-                    self.cancelMatch(accepted: false)
-                    self.mode.wrappedValue.dismiss()
+                    if self.cancelMatch(accepted: false) {
+                        self.mode.wrappedValue.dismiss()
+                    }
                 }) {
                     HStack(alignment: .center) {
                         Spacer()
@@ -2319,8 +2436,16 @@ struct CancelMatchView: View {
                 Spacer()
             }.padding()
             Spacer()
+                .alert(isPresented: $showingMessage) {
+                    Alert(title: Text(message), message: Text(""), dismissButton: .default(Text("OK")) {
+                        self.showingMessage = false
+                        self.message = ""
+                    })
+                }
         }.onAppear {
             self.fetchMatchDetails.fetchMatchDetails(accessToken: self.accessToken, matchId: matchID)
+            self.showingMessage = false
+            self.message = ""
         }
     }
     
@@ -2361,10 +2486,15 @@ struct CancelMatchView: View {
                 print("Invite Responded to successfully!")
                 if (cancelInviteResponse.success) {
                     success = true
+                } else {
+                    self.message = cancelInviteResponse.message
+                    self.showingMessage = true
                 }
             } else {
-                print("Invalid response from server")
                 
+                print("Invalid response from server")
+                self.message = "Invalid response from server"
+                self.showingMessage = true
             }
         }.resume()
         sem.wait() // bad
