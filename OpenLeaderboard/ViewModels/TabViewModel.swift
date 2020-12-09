@@ -54,7 +54,9 @@ class FetchUsersToAdd: ObservableObject {
             return
         }
         
-        let url = URL(string: (apiURL + "/user/search/notinboard/\(self.boardID)/" + searchTerm))!
+        let allowedCharacterSet = (CharacterSet(charactersIn: "!*'();:@&=+$,/?%#[] ").inverted)
+        let escapedSearchTerm = searchTerm.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)!
+        let url = URL(string: (apiURL + "/user/search/notinboard/\(self.boardID)/" + escapedSearchTerm))!
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
@@ -127,7 +129,9 @@ class FetchUsers: ObservableObject {
             return
         }
         
-        let url = URL(string: (apiURL + "/user/search/" + searchTerm))!
+        let allowedCharacterSet = (CharacterSet(charactersIn: "!*'();:@&=+$,/?%#[] ").inverted)
+        let escapedSearchTerm = searchTerm.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)!
+        let url = URL(string: (apiURL + "/user/search/" + escapedSearchTerm))!
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(self.accessToken, forHTTPHeaderField: "authorization")
@@ -302,7 +306,9 @@ class FetchAllBoards: ObservableObject {
             return
         }
         
-        let url = URL(string: (apiURL + "/board/search/" + searchTerm))!
+        let allowedCharacterSet = (CharacterSet(charactersIn: "!*'();:@&=+$,/?%#[] ").inverted)
+        let escapedSearchTerm = searchTerm.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)!
+        let url = URL(string: (apiURL + "/board/search/" + escapedSearchTerm))!
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(self.accessToken, forHTTPHeaderField: "authorization")

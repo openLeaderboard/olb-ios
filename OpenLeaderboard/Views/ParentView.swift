@@ -2491,6 +2491,7 @@ struct CancelMatchView: View {
                     self.showingMessage = true
                 }
             } else {
+                
                 print("Invalid response from server")
                 self.message = "Invalid response from server"
                 self.showingMessage = true
