@@ -1010,16 +1010,23 @@ struct BoardDetails: View {
                 if joinBoard() {
                     self.popupMessage = "Joined \(self.fetchBoardDetails.board_name)!"
                     self.showingPopup = true
+                    fetchBoardDetails.fetchBoardDetails(accessToken: self.accessToken, boardId: self.boardId)
+                } else {
+                    self.showingPopup = true
+                    // error set in joinBoard
                 }
-                fetchBoardDetails.fetchBoardDetails(accessToken: self.accessToken, boardId: self.boardId)
             }
             else if fetchBoardDetails.is_member && !fetchBoardDetails.is_admin {
                 // synchronous leave then reload
                 if leaveBoard() {
                     self.popupMessage = "Left \(self.fetchBoardDetails.board_name)!"
                     self.showingPopup = true
+                    fetchBoardDetails.fetchBoardDetails(accessToken: self.accessToken, boardId: self.boardId)
+                } else {
+                    self.showingPopup = true
+                    // error set in leaveBoard
                 }
-                fetchBoardDetails.fetchBoardDetails(accessToken: self.accessToken, boardId: self.boardId)
+                
             }
         }) {
             VStack {
@@ -1085,10 +1092,14 @@ struct BoardDetails: View {
                 print("Board joined successfully!")
                 if (joinBoardResponse.success) {
                     success = true
+                } else {
+                    success = false
+                    self.popupMessage = joinBoardResponse.message
                 }
             } else {
                 print("Invalid response from server")
-                
+                success = false
+                self.popupMessage = "Invalid response from server"
             }
         }.resume()
         
@@ -1131,10 +1142,14 @@ struct BoardDetails: View {
                 print("Board left successfully!")
                 if (leaveBoardResponse.success) {
                     success = true
+                } else {
+                    success = false
+                    self.popupMessage = leaveBoardResponse.message
                 }
             } else {
                 print("Invalid response from server")
-                
+                success = false
+                self.popupMessage = "Invalid response from server"
             }
         }.resume()
         

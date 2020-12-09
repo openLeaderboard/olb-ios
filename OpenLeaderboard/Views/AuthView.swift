@@ -128,9 +128,10 @@ struct LoginView: View {
 
 struct RegView: View {
     
+    let displayNameCharacterLimit = 16;
     @ObservedObject var authViewModel = AuthViewModel()
-    @State private var confirmationMessage = ""
-    @State private var showingConfirmation = false
+    @State private var message = ""
+    @State private var showingMessage = false
     @State private var confirmPword: String = ""
     @State var reg_emailInUse = ""
     @EnvironmentObject var userData: UserData
@@ -180,7 +181,6 @@ struct RegView: View {
                                         Text("Register").foregroundColor(bgColor).bold()
                                         Spacer()
                                     }
-                                
                                 .padding().background(btnColor)
                                 .cornerRadius(20.0)
                                 .buttonStyle(PlainButtonStyle())
@@ -191,8 +191,14 @@ struct RegView: View {
                         .padding()
                     }
                     .padding()
-            ).alert(isPresented: $showingConfirmation) {
-                Alert(title: Text("Registration Success!"), message: Text(confirmationMessage), dismissButton: .default(Text("OK")))
+            ).alert(isPresented: $showingMessage) {
+                Alert(title: Text(message), message: Text(""), dismissButton: .default(Text("OK")) {
+                    self.showingMessage = false
+                    self.message = ""
+                })
+            }.onAppear() {
+                self.showingMessage = false
+                self.message = ""
             }
         }
     }
@@ -204,6 +210,36 @@ struct RegView: View {
             let message: String
             let access_token: String
             let user_id: Int
+        }
+        
+        if(self.authViewModel.email == "") {
+            self.showingMessage = true
+            self.message = "Email cannot be empty!"
+            return
+        }
+        
+        if(self.authViewModel.name == "") {
+            self.showingMessage = true
+            self.message = "Username cannot be empty!"
+            return
+        }
+        
+        if(self.authViewModel.password == "") {
+            self.showingMessage = true
+            self.message = "Password cannot be empty!"
+            return
+        }
+        
+        if(self.confirmPword != self.authViewModel.password) {
+            self.showingMessage = true
+            self.message = "Passwords must match!"
+            return
+        }
+        
+        if(self.authViewModel.name.count > self.displayNameCharacterLimit) {
+            self.showingMessage = true
+            self.message = "Name cannot exceed \(displayNameCharacterLimit) characters"
+            return
         }
         
         guard let encoded = try? JSONEncoder().encode(authViewModel)
@@ -230,9 +266,14 @@ struct RegView: View {
                     self.userData.loggedIn = true
                     self.userData.access_token = registrationToken.access_token
                     self.userData.userId = registrationToken.user_id
+                } else {
+                    self.showingMessage = true
+                    self.message = registrationToken.message
                 }
             } else {
                 print("Invalid response from server")
+                self.showingMessage = true
+                self.message = "Invalid response from server"
             }
         }.resume()
     }
