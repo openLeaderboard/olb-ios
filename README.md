@@ -2,6 +2,7 @@
 The iOS app for openLeaderboard.
 
 ## Run
+Open in xcode with `olb-ios/OpenLeaderboard/OpenLeaderboard.xcodeproj`
 Run this with the iPhone 11 Pro simulator.
 Don't run it on an actual device if you're hosting the server on your computer, as it won't be able to connect.
 Be sure to start the backend before running the app.
